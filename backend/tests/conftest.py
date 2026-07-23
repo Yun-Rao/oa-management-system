@@ -93,3 +93,44 @@ async def login_token(client, email, password) -> str:
     )
     assert resp.status_code == 200, resp.text
     return resp.json()["access_token"]
+
+
+ALL_PERMISSIONS = [
+    ("user:create", "创建用户"),
+    ("user:list", "查看用户列表"),
+    ("user:update", "编辑用户"),
+    ("user:disable", "启用/禁用用户"),
+    ("role:list", "查看角色列表"),
+    ("role:assign", "分配角色"),
+]
+
+
+@pytest_asyncio.fixture
+async def admin(db) -> User:
+    perms = [Permission(code=c, name=n) for c, n in ALL_PERMISSIONS]
+    role = Role(code="admin", name="管理员", permissions=perms)
+    user = User(
+        email="admin@x.com",
+        name="Admin",
+        hashed_password=hash_password("Admin123!"),
+        roles=[role],
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+@pytest_asyncio.fixture
+async def admin_client(client, admin):
+    token = await login_token(client, "admin@x.com", "Admin123!")
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client
+
+
+@pytest_asyncio.fixture
+async def employee_client(client, db):
+    await make_user(db, email="emp@x.com", password="Passw0rd!")
+    token = await login_token(client, "emp@x.com", "Passw0rd!")
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client
