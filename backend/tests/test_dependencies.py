@@ -24,6 +24,13 @@ async def test_bad_token_raises_401(db):
         await get_current_user(credentials=creds("not-a-token"), db=db)
 
 
+async def test_token_with_malformed_sub_raises_401(db):
+    with pytest.raises(UnauthorizedError):
+        await get_current_user(
+            credentials=creds(create_access_token("not-a-uuid")), db=db
+        )
+
+
 async def test_valid_token_returns_user(db):
     user = await make_user(db)
     result = await get_current_user(
