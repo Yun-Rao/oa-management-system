@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, String, Uuid
+from sqlalchemy import Boolean, String, Uuid, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.associations import user_roles
@@ -15,6 +15,6 @@ class User(Base, TimestampMixin):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(100))
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
 
     roles: Mapped[list[Role]] = relationship(secondary=user_roles, lazy="selectin")
