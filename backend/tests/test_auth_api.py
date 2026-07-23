@@ -26,6 +26,14 @@ async def test_me_requires_token(client):
     assert resp.json()["error"]["code"] == "UNAUTHORIZED"
 
 
+async def test_me_rejects_invalid_token(client):
+    resp = await client.get(
+        "/api/v1/auth/me", headers={"Authorization": "Bearer garbage-token"}
+    )
+    assert resp.status_code == 401
+    assert resp.json()["error"]["code"] == "UNAUTHORIZED"
+
+
 async def test_me_returns_user_with_permissions(client, db):
     perm = await make_permission(db)
     role = await make_role(db, permissions=[perm])

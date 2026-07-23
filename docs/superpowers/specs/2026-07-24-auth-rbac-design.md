@@ -117,6 +117,7 @@ role_permissions (role_id, permission_id)  多对多
 - 禁用用户不删数据;禁用后已有 Token 在下次请求时因 `is_active=False` 被 401 拒绝
 - 角色分配用整体替换(PUT),简化并发处理
 - 管理员不能移除自己的 admin 角色(防系统锁死)
+- 密码长度限制 8–72 字符(bcrypt 仅取前 72 字节,不限制上限会造成静默截断弱化)
 
 ## 6. 错误处理
 
