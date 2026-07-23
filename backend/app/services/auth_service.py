@@ -9,6 +9,9 @@ from app.repositories.user_repository import UserRepository
 from app.schemas.auth import TokenResponse
 
 _GENERIC_FAIL = "邮箱或密码错误"
+# 预生成 dummy hash,使"用户不存在"路径也执行一次 bcrypt 校验,
+# 消除计时侧信道导致的用户枚举。
+_DUMMY_HASH = hash_password("dummy-password-for-timing")
 
 
 class AuthService:
@@ -17,7 +20,10 @@ class AuthService:
 
     async def login(self, email: str, password: str) -> TokenResponse:
         user = await self.users.get_by_email(email)
-        if user is None or not verify_password(password, user.hashed_password):
+        if user is None:
+            verify_password(password, _DUMMY_HASH)
+            raise InvalidCredentialsError(_GENERIC_FAIL)
+        if not verify_password(password, user.hashed_password):
             raise InvalidCredentialsError(_GENERIC_FAIL)
         if not user.is_active:
             raise InvalidCredentialsError(_GENERIC_FAIL)

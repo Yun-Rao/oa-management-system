@@ -20,18 +20,18 @@ async def test_login_success(db):
 
 async def test_login_wrong_password(db):
     await make_user(db, email="u@x.com", password="Secret123")
-    with pytest.raises(InvalidCredentialsError):
+    with pytest.raises(InvalidCredentialsError, match="邮箱或密码错误"):
         await AuthService(db).login("u@x.com", "wrong")
 
 
 async def test_login_unknown_email(db):
-    with pytest.raises(InvalidCredentialsError):
+    with pytest.raises(InvalidCredentialsError, match="邮箱或密码错误"):
         await AuthService(db).login("nobody@x.com", "Secret123")
 
 
 async def test_login_disabled_user(db):
     await make_user(db, email="u@x.com", password="Secret123", is_active=False)
-    with pytest.raises(InvalidCredentialsError):
+    with pytest.raises(InvalidCredentialsError, match="邮箱或密码错误"):
         await AuthService(db).login("u@x.com", "Secret123")
 
 
