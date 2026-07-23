@@ -49,7 +49,8 @@ async def seed(db: AsyncSession) -> None:
             db.add(role)
             existing_roles[code] = role
         elif code == "admin":
-            # 已存在的角色由 selectin 预加载,重新赋值不触发 IO
+            # 已存在角色的 permissions 已随上面的 select(Role) 查询通过 selectin
+            # 一并加载,此处重新赋值不会触发懒加载 IO
             existing_roles[code].permissions = list(perms.values())
     await db.flush()
 

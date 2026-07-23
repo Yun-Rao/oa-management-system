@@ -37,3 +37,16 @@ async def test_seed_is_idempotent(db):
     await seed(db)
     assert len((await db.execute(select(User))).scalars().all()) == 1
     assert len((await db.execute(select(Role))).scalars().all()) == 3
+
+
+async def test_seed_repairs_stale_admin_permissions(db):
+    stale = Role(code="admin", name="管理员", permissions=[])
+    db.add(stale)
+    await db.commit()
+
+    await seed(db)
+
+    result = await db.execute(select(Role).where(Role.code == "admin"))
+    admin = result.scalar_one()
+    assert len(admin.permissions) == 6
+    assert len((await db.execute(select(Permission))).scalars().all()) == 6
