@@ -23,8 +23,11 @@ class UserRepository:
         query = select(User)
         count_query = select(func.count()).select_from(User)
         if keyword:
-            like = f"%{keyword}%"
-            condition = User.name.like(like) | User.email.like(like)
+            escaped = keyword.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            like = f"%{escaped}%"
+            condition = User.name.ilike(like, escape="\\") | User.email.ilike(
+                like, escape="\\"
+            )
             query = query.where(condition)
             count_query = count_query.where(condition)
         total = (await self.db.execute(count_query)).scalar_one()

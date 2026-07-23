@@ -124,13 +124,19 @@ async def admin(db) -> User:
 @pytest_asyncio.fixture
 async def admin_client(client, admin):
     token = await login_token(client, "admin@x.com", "Admin123!")
-    client.headers["Authorization"] = f"Bearer {token}"
-    return client
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as c:
+        c.headers["Authorization"] = f"Bearer {token}"
+        yield c
 
 
 @pytest_asyncio.fixture
 async def employee_client(client, db):
     await make_user(db, email="emp@x.com", password="Passw0rd!")
     token = await login_token(client, "emp@x.com", "Passw0rd!")
-    client.headers["Authorization"] = f"Bearer {token}"
-    return client
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as c:
+        c.headers["Authorization"] = f"Bearer {token}"
+        yield c

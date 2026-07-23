@@ -1,3 +1,6 @@
+import uuid
+
+import pytest
 from sqlalchemy import select
 
 from app.models.user import User
@@ -65,8 +68,6 @@ async def test_update_user(admin_client, db):
 
 
 async def test_update_missing_user_404(admin_client):
-    import uuid
-
     resp = await admin_client.patch(
         f"/api/v1/users/{uuid.uuid4()}", json={"name": "新"}
     )
@@ -132,3 +133,53 @@ async def test_list_roles(admin_client, db):
 async def test_list_roles_forbidden_for_employee(employee_client):
     resp = await employee_client.get("/api/v1/roles")
     assert resp.status_code == 403
+
+
+PROTECTED_ENDPOINTS = [
+    (
+        "post",
+        "/api/v1/users",
+        {"email": "a@x.com", "name": "甲", "password": "Passw0rd!"},
+    ),
+    ("get", "/api/v1/users", None),
+    ("patch", "/api/v1/users/{id}", {"name": "新"}),
+    ("patch", "/api/v1/users/{id}/status", {"is_active": False}),
+    ("put", "/api/v1/users/{id}/roles", {"role_codes": []}),
+    ("get", "/api/v1/roles", None),
+]
+
+
+@pytest.mark.parametrize(
+    "method,url,payload",
+    PROTECTED_ENDPOINTS,
+    ids=[f"{m.upper()} {u}" for m, u, _ in PROTECTED_ENDPOINTS],
+)
+async def test_protected_endpoints_reject_anonymous(client, method, url, payload):
+    kwargs = {"json": payload} if payload is not None else {}
+    resp = await getattr(client, method)(url.format(id=uuid.uuid4()), **kwargs)
+    assert resp.status_code == 401
+
+
+@pytest.mark.parametrize(
+    "method,url,payload",
+    PROTECTED_ENDPOINTS,
+    ids=[f"{m.upper()} {u}" for m, u, _ in PROTECTED_ENDPOINTS],
+)
+async def test_protected_endpoints_forbid_employee(
+    employee_client, method, url, payload
+):
+    kwargs = {"json": payload} if payload is not None else {}
+    resp = await getattr(employee_client, method)(
+        url.format(id=uuid.uuid4()), **kwargs
+    )
+    assert resp.status_code == 403
+
+
+async def test_list_users_page_below_one_422(admin_client):
+    resp = await admin_client.get("/api/v1/users?page=0")
+    assert resp.status_code == 422
+
+
+async def test_list_users_page_size_above_max_422(admin_client):
+    resp = await admin_client.get("/api/v1/users?page_size=101")
+    assert resp.status_code == 422
