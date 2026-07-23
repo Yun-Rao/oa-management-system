@@ -1,0 +1,35 @@
+# 企业OA管理系统
+
+## 项目简介
+一个轻量级企业内部管理系统，支持用户权限管理、组织架构管理、审批流程等核心OA功能。
+
+## 技术架构
+- 后端：FastAPI + SQLAlchemy Async + PostgreSQL
+- 权限模型：RBAC (Role-Based Access Control)
+- 前端：React + Zustand
+- 异步任务：Celery + Redis
+- 数据库迁移：Alembic
+- 部署：Docker + Docker Compose
+
+## 功能模块
+- [ ] 用户认证（登录/JWT鉴权）
+- [ ] 角色权限管理（RBAC）
+- [ ] 组织架构管理（部门/职位）
+- [ ] 审批流程（请假/报销）
+- [ ] 消息通知
+
+## 分支规范
+- main：生产分支，仅接受来自develop的合并
+- develop：开发主分支
+- feature/*：功能开发分支
+
+## Commit规范
+遵循 Conventional Commits：
+- feat: 新功能
+- fix: 修复bug
+- refactor: 重构
+- docs: 文档更新
+- test: 测试相关
+
+## 快速开始
+（后面补充）
