@@ -49,8 +49,8 @@ async def seed(db: AsyncSession) -> None:
             db.add(role)
             existing_roles[code] = role
         elif code == "admin":
-            # 已存在角色的 permissions 已随上面的 select(Role) 查询通过 selectin
-            # 一并加载,此处重新赋值不会触发懒加载 IO
+            # 此处仅记录新值;旧 permissions 集合在 flush 时于 greenlet 上下文内
+            # 通过 selectin 加载以计算 diff,故无 MissingGreenlet
             existing_roles[code].permissions = list(perms.values())
     await db.flush()
 
