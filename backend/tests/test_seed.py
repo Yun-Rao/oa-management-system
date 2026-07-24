@@ -12,6 +12,7 @@ ALL_PERMISSION_CODES = {
     "user:disable", "role:list", "role:assign",
     "department:create", "department:update", "department:delete",
     "department:list", "department:members",
+    "leave:create", "leave:list", "leave:approve", "leave:list_all",
 }
 
 DEPARTMENT_PERMISSION_CODES = {
@@ -35,6 +36,9 @@ async def test_seed_creates_permissions_roles_and_admin(db):
     assert {p.code for p in roles["manager"].permissions} == {
         "department:list",
         "department:members",
+        "leave:create",
+        "leave:list",
+        "leave:approve",
     }
 
     result = await db.execute(select(User).where(User.email == settings.SEED_ADMIN_EMAIL))
@@ -79,8 +83,11 @@ async def test_seed_assigns_department_permissions(db):
     admin_perms = {p.code for p in roles["admin"].permissions}
     manager_perms = {p.code for p in roles["manager"].permissions}
     assert DEPARTMENT_PERMISSION_CODES <= admin_perms
-    assert manager_perms == {"department:list", "department:members"}
-    assert roles["employee"].permissions == []
+    assert {"department:list", "department:members"} <= manager_perms
+    assert {p.code for p in roles["employee"].permissions} == {
+        "leave:create",
+        "leave:list",
+    }
 
 
 async def test_seed_repairs_manager_permissions_on_rerun(db):
@@ -98,4 +105,24 @@ async def test_seed_repairs_manager_permissions_on_rerun(db):
     assert {p.code for p in role.permissions} == {
         "department:list",
         "department:members",
+        "leave:create",
+        "leave:list",
+        "leave:approve",
     }
+
+
+async def test_seed_assigns_leave_permissions(db):
+    await seed(db)
+
+    perms = {p.code for p in (await db.execute(select(Permission))).scalars()}
+    expected = {"leave:create", "leave:list", "leave:approve", "leave:list_all"}
+    assert expected <= perms
+
+    roles = {r.code: r for r in (await db.execute(select(Role))).scalars()}
+    admin_perms = {p.code for p in roles["admin"].permissions}
+    manager_perms = {p.code for p in roles["manager"].permissions}
+    employee_perms = {p.code for p in roles["employee"].permissions}
+    assert expected <= admin_perms
+    assert {"leave:create", "leave:list", "leave:approve"} <= manager_perms
+    assert "leave:list_all" not in manager_perms
+    assert employee_perms == {"leave:create", "leave:list"}
