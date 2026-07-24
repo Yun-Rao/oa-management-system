@@ -32,4 +32,28 @@
 - test: 测试相关
 
 ## 快速开始
-（后面补充）
+
+```bash
+# 1. 起数据库
+docker compose up -d db
+
+# 2. 配置环境变量
+cd backend && cp .env.example .env
+
+# 3. 安装依赖并迁移
+pip install -r requirements.txt
+alembic upgrade head
+
+# 4. 初始化内置角色/权限/admin(账号密码见 .env)
+python -m scripts.seed
+
+# 5. 启动
+uvicorn app.main:app --reload
+
+# 测试
+pytest
+```
+
+接口文档: http://localhost:8000/docs
+
+注意:seed 按 `SEED_ADMIN_EMAIL` 判重,修改该值后重跑会创建一个新的 admin 账号。
