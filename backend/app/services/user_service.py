@@ -2,18 +2,20 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import ConflictError, NotFoundError
+from app.core.exceptions import ConflictError, NotFoundError, ValidationError
 from app.core.security import hash_password
 from app.models.user import User
+from app.repositories.department_repository import DepartmentRepository
 from app.repositories.role_repository import RoleRepository
 from app.repositories.user_repository import UserRepository
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserOrgUpdate, UserUpdate
 
 
 class UserService:
     def __init__(self, db: AsyncSession):
         self.users = UserRepository(db)
         self.roles = RoleRepository(db)
+        self.departments = DepartmentRepository(db)
 
     async def create_user(self, data: UserCreate) -> User:
         if await self.users.get_by_email(data.email):
@@ -65,4 +67,36 @@ class UserService:
             if "admin" in operator_codes and "admin" not in new_codes:
                 raise ConflictError("不能移除自己的 admin 角色")
         user.roles = roles
+        return await self.users.save(user)
+
+    async def set_org(self, user_id: uuid.UUID, data: UserOrgUpdate) -> User:
+        user = await self.users.get_by_id(user_id)
+        if user is None:
+            raise NotFoundError("用户不存在")
+        new_dept = (
+            data.department_id
+            if "department_id" in data.model_fields_set
+            else user.department_id
+        )
+        new_mgr = (
+            data.manager_id
+            if "manager_id" in data.model_fields_set
+            else user.manager_id
+        )
+        if new_dept is not None:
+            dept = await self.departments.get_by_id(new_dept)
+            if dept is None:
+                raise NotFoundError("部门不存在")
+        if new_mgr is not None:
+            if new_dept is None:
+                raise ValidationError("用户需先分配部门,才能设置直属上级")
+            if new_mgr == user.id:
+                raise ValidationError("直属上级不能是自己")
+            manager = await self.users.get_by_id(new_mgr)
+            if manager is None:
+                raise NotFoundError("上级用户不存在")
+            if manager.department_id != new_dept:
+                raise ValidationError("直属上级必须与用户在同一部门")
+        user.department_id = new_dept
+        user.manager_id = new_mgr
         return await self.users.save(user)

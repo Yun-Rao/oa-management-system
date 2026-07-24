@@ -17,6 +17,24 @@ class UserRepository:
         result = await self.db.execute(select(User).where(User.email == email))
         return result.scalar_one_or_none()
 
+    async def list_by_department(
+        self, dept_id: uuid.UUID, offset: int, limit: int
+    ) -> tuple[list[User], int]:
+        condition = User.department_id == dept_id
+        total = (
+            await self.db.execute(
+                select(func.count()).select_from(User).where(condition)
+            )
+        ).scalar_one()
+        result = await self.db.execute(
+            select(User)
+            .where(condition)
+            .order_by(User.created_at)
+            .offset(offset)
+            .limit(limit)
+        )
+        return list(result.scalars().all()), total
+
     async def list(
         self, keyword: str | None, offset: int, limit: int
     ) -> tuple[list[User], int]:

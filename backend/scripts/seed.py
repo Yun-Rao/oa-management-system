@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.core.security import hash_password
+from app.models.department import Department  # noqa: F401  # 注册 mapper,供 User 关系解析
 from app.models.permission import Permission
 from app.models.role import Role
 from app.models.user import User
@@ -17,6 +18,11 @@ PERMISSIONS = [
     ("user:disable", "启用/禁用用户"),
     ("role:list", "查看角色列表"),
     ("role:assign", "分配角色"),
+    ("department:create", "创建部门"),
+    ("department:update", "编辑/移动部门"),
+    ("department:delete", "删除部门"),
+    ("department:list", "查看部门树"),
+    ("department:members", "查看部门人员"),
 ]
 
 ROLES = [
@@ -24,6 +30,13 @@ ROLES = [
     ("manager", "部门主管", "审批本部门员工申请"),
     ("employee", "普通员工", "基础员工角色"),
 ]
+
+# 角色权限映射;None 表示全部权限点
+ROLE_PERMISSIONS: dict[str, list[str] | None] = {
+    "admin": None,
+    "manager": ["department:list", "department:members"],
+    "employee": [],
+}
 
 
 async def seed(db: AsyncSession) -> None:
@@ -42,16 +55,20 @@ async def seed(db: AsyncSession) -> None:
 
     existing_roles = {r.code: r for r in (await db.execute(select(Role))).scalars()}
     for code, name, description in ROLES:
+        wanted = ROLE_PERMISSIONS[code]
+        target_perms = (
+            list(perms.values()) if wanted is None else [perms[c] for c in wanted]
+        )
         if code not in existing_roles:
             role = Role(code=code, name=name, description=description)
-            if code == "admin":
-                role.permissions = list(perms.values())
+            role.permissions = target_perms
             db.add(role)
             existing_roles[code] = role
-        elif code == "admin":
-            # 此处仅记录新值;旧 permissions 集合在 flush 时于 greenlet 上下文内
+        else:
+            # 幂等修复:重跑 seed 时校准角色权限集合
+            # 旧 permissions 集合在 flush 时于 greenlet 上下文内
             # 通过 selectin 加载以计算 diff,故无 MissingGreenlet
-            existing_roles[code].permissions = list(perms.values())
+            existing_roles[code].permissions = target_perms
     await db.flush()
 
     result = await db.execute(

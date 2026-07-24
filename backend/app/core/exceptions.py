@@ -30,3 +30,8 @@ class NotFoundError(AppError):
 class ConflictError(AppError):
     status_code = 409
     code = "CONFLICT"
+
+
+class ValidationError(AppError):
+    status_code = 422
+    code = "VALIDATION_ERROR"

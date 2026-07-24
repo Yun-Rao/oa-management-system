@@ -10,6 +10,7 @@ from app.schemas.user import (
     RoleAssignRequest,
     UserCreate,
     UserListResponse,
+    UserOrgUpdate,
     UserResponse,
     UserStatusUpdate,
     UserUpdate,
@@ -73,3 +74,13 @@ async def assign_roles(
     operator: User = Depends(require_permission("role:assign")),
 ):
     return await UserService(db).assign_roles(user_id, data.role_codes, operator)
+
+
+@router.patch("/{user_id}/org", response_model=UserResponse)
+async def set_org(
+    user_id: uuid.UUID,
+    data: UserOrgUpdate,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_permission("user:update")),
+):
+    return await UserService(db).set_org(user_id, data)

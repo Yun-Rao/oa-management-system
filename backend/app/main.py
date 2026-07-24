@@ -1,6 +1,6 @@
 from fastapi import APIRouter, FastAPI
 
-from app.api.v1 import auth, roles, users
+from app.api.v1 import auth, departments, roles, users
 from app.core.handlers import register_exception_handlers
 
 app = FastAPI(title="OA Management System")
@@ -10,6 +10,7 @@ api_v1 = APIRouter(prefix="/api/v1")
 api_v1.include_router(auth.router)
 api_v1.include_router(users.router)
 api_v1.include_router(roles.router)
+api_v1.include_router(departments.router)
 app.include_router(api_v1)
 
 

@@ -4,7 +4,13 @@ import pytest
 from sqlalchemy import select
 
 from app.models.user import User
-from tests.conftest import login_token, make_role, make_user
+from tests.conftest import (
+    ALL_PERMISSIONS,
+    login_token,
+    make_department,
+    make_role,
+    make_user,
+)
 
 
 async def test_create_user_requires_auth(client):
@@ -127,7 +133,7 @@ async def test_list_roles(admin_client, db):
     codes = {r["code"] for r in resp.json()}
     assert {"admin", "manager"} <= codes
     admin_body = next(r for r in resp.json() if r["code"] == "admin")
-    assert len(admin_body["permissions"]) == 6
+    assert len(admin_body["permissions"]) == len(ALL_PERMISSIONS)
 
 
 async def test_list_roles_forbidden_for_employee(employee_client):
@@ -173,6 +179,16 @@ async def test_protected_endpoints_forbid_employee(
         url.format(id=uuid.uuid4()), **kwargs
     )
     assert resp.status_code == 403
+
+
+async def test_user_response_includes_org_briefs(admin_client, db):
+    dept = await make_department(db, name="技术部")
+    user = await make_user(db, email="u@x.com", department_id=dept.id)
+    resp = await admin_client.get("/api/v1/users")
+    assert resp.status_code == 200
+    target = [u for u in resp.json()["items"] if u["id"] == str(user.id)][0]
+    assert target["department"]["name"] == "技术部"
+    assert target["manager"] is None
 
 
 async def test_list_users_page_below_one_422(admin_client):

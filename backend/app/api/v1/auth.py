@@ -5,7 +5,8 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.auth import ChangePasswordRequest, LoginRequest, TokenResponse
-from app.schemas.user import MeResponse, RoleBrief
+from app.schemas.department import DepartmentBrief
+from app.schemas.user import MeResponse, RoleBrief, UserBrief
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -28,6 +29,16 @@ async def me(current_user: User = Depends(get_current_user)):
         is_active=current_user.is_active,
         roles=[RoleBrief(code=r.code, name=r.name) for r in current_user.roles],
         permissions=permissions,
+        department=(
+            DepartmentBrief.model_validate(current_user.department)
+            if current_user.department
+            else None
+        ),
+        manager=(
+            UserBrief.model_validate(current_user.manager)
+            if current_user.manager
+            else None
+        ),
     )
 
 
