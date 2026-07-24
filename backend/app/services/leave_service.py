@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -104,8 +105,8 @@ class LeaveService:
         department_id: uuid.UUID | None,
         status: str | None,
         leave_type: str | None,
-        start_from,
-        end_to,
+        start_from: date | None,
+        end_to: date | None,
         page: int,
         page_size: int,
     ) -> tuple[list[LeaveRequest], int]:
