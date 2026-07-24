@@ -23,6 +23,10 @@ PERMISSIONS = [
     ("department:delete", "删除部门"),
     ("department:list", "查看部门树"),
     ("department:members", "查看部门人员"),
+    ("leave:create", "提交/撤回请假申请"),
+    ("leave:list", "查看我的申请"),
+    ("leave:approve", "审批请假申请"),
+    ("leave:list_all", "查看全部审批记录"),
 ]
 
 ROLES = [
@@ -34,8 +38,14 @@ ROLES = [
 # 角色权限映射;None 表示全部权限点
 ROLE_PERMISSIONS: dict[str, list[str] | None] = {
     "admin": None,
-    "manager": ["department:list", "department:members"],
-    "employee": [],
+    "manager": [
+        "department:list",
+        "department:members",
+        "leave:create",
+        "leave:list",
+        "leave:approve",
+    ],
+    "employee": ["leave:create", "leave:list"],
 }
 
 
