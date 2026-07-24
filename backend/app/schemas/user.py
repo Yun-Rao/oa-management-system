@@ -2,12 +2,26 @@ import uuid
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from app.schemas.department import DepartmentBrief
+
 
 class RoleBrief(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     code: str
     name: str
+
+
+class UserBrief(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+
+
+class UserOrgUpdate(BaseModel):
+    department_id: uuid.UUID | None = None
+    manager_id: uuid.UUID | None = None
 
 
 class UserCreate(BaseModel):
@@ -37,6 +51,8 @@ class UserResponse(BaseModel):
     name: str
     is_active: bool
     roles: list[RoleBrief]
+    department: DepartmentBrief | None = None
+    manager: UserBrief | None = None
 
 
 class UserListResponse(BaseModel):
@@ -52,4 +68,6 @@ class MeResponse(BaseModel):
     name: str
     is_active: bool
     roles: list[RoleBrief]
+    department: DepartmentBrief | None = None
+    manager: UserBrief | None = None
     permissions: list[str]

@@ -41,3 +41,12 @@ async def test_error_response_format():
         resp = await c.get("/conflict")
         assert resp.status_code == 409
         assert resp.json()["error"]["code"] == "CONFLICT"
+
+
+def test_validation_error_status_and_code():
+    from app.core.exceptions import ValidationError
+
+    err = ValidationError("直属上级不能是自己")
+    assert err.status_code == 422
+    assert err.code == "VALIDATION_ERROR"
+    assert err.message == "直属上级不能是自己"
