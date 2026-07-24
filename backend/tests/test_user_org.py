@@ -66,6 +66,21 @@ async def test_set_org_clear_manager(admin_client, db):
     assert resp.json()["department"]["id"] == str(dept.id)
 
 
+async def test_set_org_move_department_without_manager_change_422(admin_client, db):
+    dept_a = await make_department(db, name="技术部")
+    dept_b = await make_department(db, name="市场部")
+    manager = await make_user(db, email="m@x.com", department_id=dept_a.id)
+    user = await make_user(
+        db, email="u@x.com", department_id=dept_a.id, manager_id=manager.id
+    )
+
+    resp = await admin_client.patch(
+        f"/api/v1/users/{user.id}/org", json={"department_id": str(dept_b.id)}
+    )
+    assert resp.status_code == 422
+    assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
 async def test_set_org_unknown_department_404(admin_client, db):
     import uuid
 
