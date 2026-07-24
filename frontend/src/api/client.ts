@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import type { ApiErrorBody } from "../types/api";
+
 export const TOKEN_KEY = "oa_token";
 
 export class ApiError extends Error {
@@ -56,10 +58,9 @@ client.interceptors.response.use(
         typeof body === "object" &&
         body !== null &&
         "error" in body &&
-        typeof (body as { error?: { code?: unknown } }).error?.code === "string"
+        typeof (body as ApiErrorBody).error?.code === "string"
       ) {
-        const { code, message } = (body as { error: { code: string; message: string } })
-          .error;
+        const { code, message } = (body as ApiErrorBody).error;
         return Promise.reject(new ApiError(code, message));
       }
     }

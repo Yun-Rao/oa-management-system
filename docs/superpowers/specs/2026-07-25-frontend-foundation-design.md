@@ -56,7 +56,7 @@ frontend/
     ├── components/
     │   ├── MainLayout.tsx    # 侧边菜单 + 顶栏(用户名/退出)
     │   ├── RequireAuth.tsx   # 无 token → Navigate /login
-    │   └── menu.ts           # 菜单配置(path/label/icon/permission)
+    │   └── menu.tsx          # 菜单配置(path/label/icon/permission)
     ├── pages/
     │   ├── LoginPage.tsx     # 占位(P0#1 替换)
     │   └── HomePage.tsx      # 占位首页
@@ -71,7 +71,7 @@ frontend/
 - `baseURL: "/api/v1"`,超时 10s
 - 请求拦截器:auth store 有 token 则加 `Authorization: Bearer <token>`
 - 响应拦截器:
-  - 2xx 直接返回 data
+  - 2xx 直接返回完整 AxiosResponse,调用方解构 `{ data }`
   - 401 → 清空 auth store,跳转 `/login`(避免循环:登录请求自身的 401 不跳转)
   - 业务错误(400/403/404/409/422 且响应体为 `{"error":{code,message}}`)→ 抛出规范化 `ApiError {code, message}`
   - 其他(网络错误/5xx/非信封格式)→ 抛出 `ApiError {code: "UNKNOWN", message: "网络异常,请稍后重试"}`
