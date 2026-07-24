@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from app.models.user import User
-from tests.conftest import login_token, make_role, make_user
+from tests.conftest import ALL_PERMISSIONS, login_token, make_role, make_user
 
 
 async def test_create_user_requires_auth(client):
@@ -127,7 +127,7 @@ async def test_list_roles(admin_client, db):
     codes = {r["code"] for r in resp.json()}
     assert {"admin", "manager"} <= codes
     admin_body = next(r for r in resp.json() if r["code"] == "admin")
-    assert len(admin_body["permissions"]) == 6
+    assert len(admin_body["permissions"]) == len(ALL_PERMISSIONS)
 
 
 async def test_list_roles_forbidden_for_employee(employee_client):

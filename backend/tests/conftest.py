@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.core.security import hash_password
 from app.main import app
 from app.models.base import Base
+from app.models.department import Department
 from app.models.permission import Permission
 from app.models.role import Role
 from app.models.user import User
@@ -33,8 +34,13 @@ async def db():
         await conn.run_sync(Base.metadata.create_all)
     async with TestSession() as session:
         yield session
-    async with engine.begin() as conn:
+    async with engine.connect() as conn:
+        # SQLite 在 DROP TABLE 时会对自引用外键执行隐式清空并校验 FK,
+        # 需先关闭 foreign_keys 再 drop_all
+        await conn.exec_driver_sql("PRAGMA foreign_keys=OFF")
         await conn.run_sync(Base.metadata.drop_all)
+        await conn.exec_driver_sql("PRAGMA foreign_keys=ON")
+        await conn.commit()
 
 
 @pytest_asyncio.fixture
@@ -73,6 +79,8 @@ async def make_user(
     name="测试用户",
     roles=None,
     is_active=True,
+    department_id=None,
+    manager_id=None,
 ) -> User:
     u = User(
         email=email,
@@ -80,11 +88,21 @@ async def make_user(
         hashed_password=hash_password(password),
         roles=roles or [],
         is_active=is_active,
+        department_id=department_id,
+        manager_id=manager_id,
     )
     db.add(u)
     await db.commit()
     await db.refresh(u)
     return u
+
+
+async def make_department(db, name="技术部", parent_id=None) -> Department:
+    d = Department(name=name, parent_id=parent_id)
+    db.add(d)
+    await db.commit()
+    await db.refresh(d)
+    return d
 
 
 async def login_token(client, email, password) -> str:
@@ -102,6 +120,11 @@ ALL_PERMISSIONS = [
     ("user:disable", "启用/禁用用户"),
     ("role:list", "查看角色列表"),
     ("role:assign", "分配角色"),
+    ("department:create", "创建部门"),
+    ("department:update", "编辑/移动部门"),
+    ("department:delete", "删除部门"),
+    ("department:list", "查看部门树"),
+    ("department:members", "查看部门人员"),
 ]
 
 
