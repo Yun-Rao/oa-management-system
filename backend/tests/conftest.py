@@ -4,11 +4,14 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
+from datetime import date
+
 from app.core.database import get_db
 from app.core.security import hash_password
 from app.main import app
 from app.models.base import Base
 from app.models.department import Department
+from app.models.leave import LeaveRequest
 from app.models.permission import Permission
 from app.models.role import Role
 from app.models.user import User
@@ -105,6 +108,31 @@ async def make_department(db, name="技术部", parent_id=None) -> Department:
     return d
 
 
+async def make_leave(
+    db,
+    applicant: User,
+    approver: User,
+    type="personal",
+    start_date=date(2026, 8, 1),
+    end_date=date(2026, 8, 2),
+    reason="私事",
+    status="pending",
+) -> LeaveRequest:
+    leave = LeaveRequest(
+        applicant_id=applicant.id,
+        approver_id=approver.id,
+        type=type,
+        start_date=start_date,
+        end_date=end_date,
+        reason=reason,
+        status=status,
+    )
+    db.add(leave)
+    await db.commit()
+    await db.refresh(leave)
+    return leave
+
+
 async def login_token(client, email, password) -> str:
     resp = await client.post(
         "/api/v1/auth/login", json={"email": email, "password": password}
@@ -125,6 +153,10 @@ ALL_PERMISSIONS = [
     ("department:delete", "删除部门"),
     ("department:list", "查看部门树"),
     ("department:members", "查看部门人员"),
+    ("leave:create", "提交/撤回请假申请"),
+    ("leave:list", "查看我的申请"),
+    ("leave:approve", "审批请假申请"),
+    ("leave:list_all", "查看全部审批记录"),
 ]
 
 
