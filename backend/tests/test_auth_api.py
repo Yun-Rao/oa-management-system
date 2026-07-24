@@ -1,4 +1,10 @@
-from tests.conftest import login_token, make_permission, make_role, make_user
+from tests.conftest import (
+    login_token,
+    make_department,
+    make_permission,
+    make_role,
+    make_user,
+)
 
 
 async def test_login_returns_token(client, db):
@@ -58,6 +64,26 @@ async def test_me_rejects_disabled_user(client, db):
         "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
     )
     assert resp.status_code == 401
+
+
+async def test_me_includes_department_and_manager(client, db):
+    dept = await make_department(db, name="技术部")
+    manager = await make_user(db, email="m@x.com", department_id=dept.id)
+    await make_user(
+        db,
+        email="u@x.com",
+        password="Passw0rd!",
+        department_id=dept.id,
+        manager_id=manager.id,
+    )
+    token = await login_token(client, "u@x.com", "Passw0rd!")
+    resp = await client.get(
+        "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["department"]["name"] == "技术部"
+    assert body["manager"]["id"] == str(manager.id)
 
 
 async def test_change_password_flow(client, db):
