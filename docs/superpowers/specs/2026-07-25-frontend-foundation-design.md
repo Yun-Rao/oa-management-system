@@ -135,9 +135,9 @@ Vitest + jsdom:
 
 ## 8. 验收标准
 
-- [ ] `npm run dev` 启动,访问 `/` 无 token 时跳转 `/login` 占位页
-- [ ] dev server 代理 `/api/v1/*` 到 :8000(可用 curl 经 5173 端口验证)
-- [ ] `npm test` 全绿(store + client 单测)
-- [ ] `tsc --noEmit` 零错误,`vite build` 成功
-- [ ] 主布局渲染侧边菜单(仅"首页")与顶栏,退出按钮清态跳登录
-- [ ] 有 token 时刷新页面自动 fetchMe 恢复用户(可在 DevTools 手工置 token 验证)
+- [x] `npm run dev` 启动,访问 `/` 无 token 时跳转 `/login` 占位页
+- [x] dev server 代理 `/api/v1/*` 到 :8000(可用 curl 经 5173 端口验证)
+- [x] `npm test` 全绿(store + client 单测)
+- [x] `tsc --noEmit` 零错误,`vite build` 成功
+- [x] 主布局渲染侧边菜单(仅"首页")与顶栏,退出按钮清态跳登录
+- [x] 有 token 时刷新页面自动 fetchMe 恢复用户(可在 DevTools 手工置 token 验证)
