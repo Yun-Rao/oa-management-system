@@ -1,5 +1,8 @@
 from datetime import date
 
+import pytest
+
+from app.core.exceptions import ConflictError
 from app.models.leave import LeaveRequest, LeaveStatusHistory
 from app.repositories.leave_repository import LeaveRepository
 from tests.conftest import make_department, make_leave, make_user
@@ -20,6 +23,25 @@ async def test_find_overlapping_detects(db):
     assert await repo.find_overlapping(applicant.id, date(2026, 8, 4), date(2026, 8, 5)) is None
     other = await make_user(db, email="b@x.com")
     assert await repo.find_overlapping(other.id, date(2026, 8, 2), date(2026, 8, 5)) is None
+
+
+async def test_find_overlapping_blocks_on_approved(db):
+    repo = LeaveRepository(db)
+    applicant = await make_user(db, email="a@x.com")
+    approver = await make_user(db, email="m@x.com")
+    await make_leave(
+        db,
+        applicant,
+        approver,
+        status="approved",
+        start_date=date(2026, 8, 1),
+        end_date=date(2026, 8, 3),
+    )
+    found = await repo.find_overlapping(
+        applicant.id, date(2026, 8, 2), date(2026, 8, 5)
+    )
+    assert found is not None
+    assert found.status == "approved"
 
 
 async def test_find_overlapping_ignores_inactive_status(db):
@@ -72,6 +94,18 @@ async def test_transition_updates_status_and_appends_history(db):
     assert entry.actor_id == approver.id
 
 
+async def test_transition_conflict_when_status_already_changed(db):
+    repo = LeaveRepository(db)
+    applicant = await make_user(db, email="a@x.com")
+    approver = await make_user(db, email="m@x.com")
+    leave = await make_leave(db, applicant, approver, status="approved")
+    with pytest.raises(ConflictError):
+        await repo.transition(leave, "pending", "canceled", applicant.id, None)
+    await db.refresh(leave)
+    assert leave.status == "approved"
+    assert len(leave.history) == 0
+
+
 async def test_list_mine_filter_and_total(db):
     repo = LeaveRepository(db)
     applicant = await make_user(db, email="a@x.com")
@@ -85,6 +119,22 @@ async def test_list_mine_filter_and_total(db):
     items, total = await repo.list_mine(applicant.id, "approved", 0, 20)
     assert total == 1
     assert items[0].status == "approved"
+
+
+async def test_list_todo_returns_only_pending_for_approver(db):
+    repo = LeaveRepository(db)
+    approver = await make_user(db, email="m@x.com")
+    applicant = await make_user(db, email="a@x.com")
+    other_approver = await make_user(db, email="n@x.com")
+    await make_leave(db, applicant, approver, status="pending")
+    await make_leave(db, applicant, approver, status="approved")
+    # approver 仅作为申请人的单不应出现在其待办中
+    await make_leave(db, approver, other_approver, status="pending")
+
+    items, total = await repo.list_todo(approver.id, 0, 20)
+    assert total == 1
+    assert items[0].status == "pending"
+    assert items[0].approver_id == approver.id
 
 
 async def test_list_all_department_and_status_filter(db):

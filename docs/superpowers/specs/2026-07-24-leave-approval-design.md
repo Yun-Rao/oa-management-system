@@ -81,6 +81,7 @@ pending ──审批人通过──→ approved(终态)
 
 - 三个终态不可再变更;对已终态单据的任何操作 → 409 CONFLICT
 - 每次状态迁移向 leave_status_history 追加一行(创建申请时记 NULL → pending)
+- 状态迁移在 repository 层以条件 UPDATE(WHERE status = from_status)原子执行,并发重复审批/撤回时后到的请求得到 409
 
 ### 业务规则
 

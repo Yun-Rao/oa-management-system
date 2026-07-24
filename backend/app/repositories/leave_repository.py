@@ -1,8 +1,10 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.exceptions import ConflictError
 
 from app.models.leave import LeaveRequest, LeaveStatusHistory
 from app.models.user import User
@@ -45,6 +47,14 @@ class LeaveRepository:
         actor_id: uuid.UUID,
         comment: str | None,
     ) -> LeaveRequest:
+        result = await self.db.execute(
+            update(LeaveRequest)
+            .where(LeaveRequest.id == leave.id, LeaveRequest.status == from_status)
+            .values(status=to_status)
+        )
+        if result.rowcount == 0:
+            await self.db.rollback()
+            raise ConflictError("该申请已处理,无法操作")
         leave.status = to_status
         self.db.add(
             LeaveStatusHistory(
