@@ -153,4 +153,45 @@ describe("UserOrgModal", () => {
     expect(await within(listbox).findByLabelText("李市场")).toBeInTheDocument();
     expect(within(listbox).queryByLabelText("王主管")).not.toBeInTheDocument();
   });
+
+  it("部门成员超过一页:翻页拉全,末页成员也可选为上级", async () => {
+    const blank: UserResponse = {
+      id: "x",
+      email: "x@x.com",
+      name: "成员",
+      is_active: true,
+      roles: [],
+      department: null,
+      manager: null,
+    };
+    const page1 = Array.from({ length: 100 }, (_, i) => ({
+      ...blank,
+      id: `p1-${i}`,
+      name: `成员${i}`,
+    }));
+    const page2 = [{ ...blank, id: "u-last", name: "末页主管" }];
+    vi.mocked(listDeptMembers).mockImplementation(async (_id: string, params: { page: number }) =>
+      params.page === 1
+        ? { items: page1, total: 101, page: 1, page_size: 100 }
+        : { items: page2, total: 101, page: 2, page_size: 100 }
+    );
+    render(<UserOrgModal user={target} onClose={() => {}} onSuccess={() => {}} />);
+    await waitFor(() =>
+      expect(listDeptMembers).toHaveBeenCalledWith("d1", { page: 2, page_size: 100 })
+    );
+    // 虚拟滚动下直接找末页选项未必渲染,用搜索过滤
+    const user = userEvent.setup();
+    await user.click(managerFormItem().getByRole("combobox"));
+    await user.type(managerFormItem().getByRole("combobox"), "末页");
+    const listbox = await screen.findByRole("listbox");
+    expect(await within(listbox).findByLabelText("末页主管")).toBeInTheDocument();
+  });
+
+  it("候选尚未含现任上级时:回显姓名而非 UUID", async () => {
+    // 候选只有用户自己(被排除后为空),现任上级 u2 不在候选中
+    vi.mocked(listDeptMembers).mockResolvedValue({ items: [d1Members[0]], total: 1, page: 1, page_size: 100 });
+    render(<UserOrgModal user={target} onClose={() => {}} onSuccess={() => {}} />);
+    expect(await managerFormItem().findByText("王主管")).toBeInTheDocument();
+    expect(managerFormItem().queryByText("u2")).not.toBeInTheDocument();
+  });
 });
