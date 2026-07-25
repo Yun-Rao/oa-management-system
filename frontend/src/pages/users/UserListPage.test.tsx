@@ -118,4 +118,26 @@ describe("UserListPage", () => {
     await screen.findByText("张三");
     expect(screen.getByRole("button", { name: "归属" })).toBeInTheDocument();
   });
+
+  it("仅 user:list:操作列与新建按钮全部隐藏", async () => {
+    useAuthStore.setState({ user: { ...adminUser, permissions: ["user:list"] } });
+    renderPage();
+    await screen.findByText("张三");
+    expect(screen.queryByRole("button", { name: "新建用户" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "编辑" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "分配角色" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "归属" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "禁用" })).not.toBeInTheDocument();
+  });
+
+  it("部分权限:仅显示对应操作(user:update → 编辑/归属)", async () => {
+    useAuthStore.setState({ user: { ...adminUser, permissions: ["user:list", "user:update"] } });
+    renderPage();
+    await screen.findByText("张三");
+    expect(screen.getByRole("button", { name: "编辑" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "归属" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "新建用户" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "分配角色" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "禁用" })).not.toBeInTheDocument();
+  });
 });

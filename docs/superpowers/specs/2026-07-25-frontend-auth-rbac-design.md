@@ -89,6 +89,7 @@ menu.tsx:MENU_ITEMS 追加
 - 状态:`items/total/page/pageSize/keyword/loading`,单一 `fetchList()` 供初次、搜索、翻页、操作成功后复用
 - 搜索:输入框回车或点按钮,重置到第 1 页;`page_size` 默认 20
 - 列:姓名、邮箱、角色(Tag 列表)、部门、状态(Tag 启用/禁用)、操作(编辑 / 分配角色 / 启用|禁用)
+- 按钮级权限门控(与后端端点权限一致,2026-07-25 补):新建用户 `user:create`;编辑/归属 `user:update`;分配角色 `role:assign`;启用|禁用 `user:disable`;无对应权限不渲染
 - 启用禁用:`Popconfirm` 确认 → `setUserStatus` → `message.success` + 刷新当前页
 - 新建/编辑/分配角色成功:`message.success` + 刷新当前页
 - 拉取失败(含 403):页内 `Alert` 错误态,不白屏

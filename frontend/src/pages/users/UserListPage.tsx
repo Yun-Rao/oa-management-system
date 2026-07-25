@@ -20,6 +20,10 @@ export default function UserListPage() {
   const { message } = App.useApp();
   const hasPermission = useAuthStore((s) => s.hasPermission);
   const allowed = hasPermission("user:list");
+  const canCreate = hasPermission("user:create");
+  const canUpdate = hasPermission("user:update");
+  const canAssign = hasPermission("role:assign");
+  const canDisable = hasPermission("user:disable");
 
   const [items, setItems] = useState<UserResponse[]>([]);
   const [total, setTotal] = useState(0);
@@ -95,32 +99,38 @@ export default function UserListPage() {
       key: "actions",
       render: (_: unknown, u: UserResponse) => (
         <Space>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              setEditing(u);
-              setFormOpen(true);
-            }}
-          >
-            编辑
-          </Button>
-          <Button type="link" size="small" onClick={() => setAssigning(u)}>
-            分配角色
-          </Button>
-          {hasPermission("user:update") && (
+          {canUpdate && (
+            <Button
+              type="link"
+              size="small"
+              onClick={() => {
+                setEditing(u);
+                setFormOpen(true);
+              }}
+            >
+              编辑
+            </Button>
+          )}
+          {canAssign && (
+            <Button type="link" size="small" onClick={() => setAssigning(u)}>
+              分配角色
+            </Button>
+          )}
+          {canUpdate && (
             <Button type="link" size="small" onClick={() => setOrgEditing(u)}>
               归属
             </Button>
           )}
-          <Popconfirm
-            title={u.is_active ? "确认禁用该用户?" : "确认启用该用户?"}
-            onConfirm={() => void onToggleStatus(u)}
-          >
-            <Button type="link" size="small" danger={u.is_active}>
-              {u.is_active ? "禁用" : "启用"}
-            </Button>
-          </Popconfirm>
+          {canDisable && (
+            <Popconfirm
+              title={u.is_active ? "确认禁用该用户?" : "确认启用该用户?"}
+              onConfirm={() => void onToggleStatus(u)}
+            >
+              <Button type="link" size="small" danger={u.is_active}>
+                {u.is_active ? "禁用" : "启用"}
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -139,15 +149,17 @@ export default function UserListPage() {
             onSearch={onSearch}
             style={{ width: 240 }}
           />
-          <Button
-            type="primary"
-            onClick={() => {
-              setEditing(null);
-              setFormOpen(true);
-            }}
-          >
-            新建用户
-          </Button>
+          {canCreate && (
+            <Button
+              type="primary"
+              onClick={() => {
+                setEditing(null);
+                setFormOpen(true);
+              }}
+            >
+              新建用户
+            </Button>
+          )}
         </Space>
       }
     >
