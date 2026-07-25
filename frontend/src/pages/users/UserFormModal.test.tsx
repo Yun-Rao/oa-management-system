@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -58,6 +59,27 @@ describe("UserFormModal 创建模式", () => {
 });
 
 describe("UserFormModal 编辑模式", () => {
+  it("StrictMode 下仍预填邮箱姓名(回归:effect 时序不得丢值)", async () => {
+    render(
+      <StrictMode>
+        <UserFormModal open editing={editingUser} onClose={() => {}} onSuccess={() => {}} />
+      </StrictMode>
+    );
+    await waitFor(() => expect(screen.getByLabelText("邮箱")).toHaveValue("a@x.com"));
+    expect(screen.getByLabelText("姓名")).toHaveValue("张三");
+  });
+
+  it("关闭后重新打开仍预填", async () => {
+    const { rerender } = render(
+      <UserFormModal open={false} editing={editingUser} onClose={() => {}} onSuccess={() => {}} />
+    );
+    rerender(
+      <UserFormModal open editing={editingUser} onClose={() => {}} onSuccess={() => {}} />
+    );
+    await waitFor(() => expect(screen.getByLabelText("邮箱")).toHaveValue("a@x.com"));
+    expect(screen.getByLabelText("姓名")).toHaveValue("张三");
+  });
+
   it("预填邮箱姓名、无密码字段,提交调 updateUser", async () => {
     vi.mocked(updateUser).mockResolvedValue(editingUser);
     render(<UserFormModal open editing={editingUser} onClose={() => {}} onSuccess={() => {}} />);

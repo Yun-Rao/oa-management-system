@@ -26,11 +26,8 @@ export default function UserFormModal({ open, editing, onClose, onSuccess }: Pro
   useEffect(() => {
     if (open) {
       setError(null);
-      if (editing) {
-        form.setFieldsValue({ email: editing.email, name: editing.name });
-      }
     }
-  }, [open, editing, form]);
+  }, [open]);
 
   async function onFinish(values: UserFormValues) {
     setSubmitting(true);
@@ -60,7 +57,14 @@ export default function UserFormModal({ open, editing, onClose, onSuccess }: Pro
       destroyOnHidden
     >
       {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
-      <Form<UserFormValues> form={form} layout="vertical" onFinish={onFinish} preserve={false}>
+      <Form<UserFormValues>
+        key={editing ? editing.id : "new"}
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        preserve={false}
+        initialValues={editing ? { email: editing.email, name: editing.name } : undefined}
+      >
         <Form.Item
           name="email"
           label="邮箱"
