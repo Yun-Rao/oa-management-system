@@ -1,4 +1,4 @@
-import { HomeOutlined } from "@ant-design/icons";
+import { HomeOutlined, TeamOutlined } from "@ant-design/icons";
 import type { ReactNode } from "react";
 
 export interface MenuItemConfig {
@@ -10,4 +10,5 @@ export interface MenuItemConfig {
 
 export const MENU_ITEMS: MenuItemConfig[] = [
   { key: "/", label: "首页", icon: <HomeOutlined />, permission: null },
+  { key: "/users", label: "用户管理", icon: <TeamOutlined />, permission: "user:list" },
 ];
