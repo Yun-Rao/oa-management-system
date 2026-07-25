@@ -166,18 +166,18 @@ rejectLeave(id: string, reason: string): Promise<LeaveResponse>
 
 **自动化门禁:**
 
-- [ ] `npm test` 全绿(既有 92 + 本期新增)
-- [ ] `tsc --noEmit` 零错误,`vite build` 成功
+- [x] `npm test` 全绿(既有 92 + 本期新增)
+- [x] `tsc --noEmit` 零错误,`vite build` 成功
 
 **浏览器实测(由执行 Agent 使用 chrome-devtools 驱动真实浏览器完成,非人工点检;前置:后端 :8000 + dev server :5173 代理;截图存档至 `.superpowers/sdd/acceptance/`):**
 
-- [ ] 准备:admin 为测试员工设置直属上级(若未设);创建/已知密码的 employee 与 manager 账号
-- [ ] employee 登录:菜单仅"请假审批"一个相关入口,页内仅"我的申请"Tab;新建申请成功,列表出现 pending 单
+- [x] 准备:admin 为测试员工设置直属上级(若未设);创建/已知密码的 employee 与 manager 账号
+- [x] employee 登录:菜单仅"请假审批"一个相关入口,页内仅"我的申请"Tab;新建申请成功,列表出现 pending 单
 - [ ] employee 提交时间倒挂(前端 RangePicker 限制,用接口或绕过验证 422 由后端透出——以前端校验为主,不强制触发)
-- [ ] employee 提交区间重叠申请 → 409 错误提示(Modal 内 Alert)
-- [ ] employee 撤回 pending 单 → 状态变已撤回;终态行无撤回按钮
-- [ ] manager 登录:"待我审批"Tab 可见该员工的单;驳回(填原因)→ 状态已驳回
-- [ ] employee 再提交一单 → manager 通过 → 状态已通过
-- [ ] 详情弹窗:状态历史完整(创建 → 撤回/驳回/通过),驳回单显示驳回原因
-- [ ] admin:"全部记录"Tab,按状态筛选生效,按部门筛选生效;详情可看任意单
-- [ ] 每场景截图存档至 `.superpowers/sdd/acceptance/`,作为验收证据
+- [x] employee 提交区间重叠申请 → 409 错误提示(Modal 内 Alert)
+- [x] employee 撤回 pending 单 → 状态变已撤回;终态行无撤回按钮
+- [x] manager 登录:"待我审批"Tab 可见该员工的单;驳回(填原因)→ 状态已驳回
+- [x] employee 再提交一单 → manager 通过 → 状态已通过
+- [x] 详情弹窗:状态历史完整(创建 → 撤回/驳回/通过),驳回单显示驳回原因
+- [x] admin:"全部记录"Tab,按状态筛选生效,按部门筛选生效;详情可看任意单
+- [x] 每场景截图存档至 `.superpowers/sdd/acceptance/`,作为验收证据
