@@ -130,7 +130,7 @@ export async function changePassword(oldPassword: string, newPassword: string): 
 
 新增 devDependencies:`@testing-library/react`、`@testing-library/user-event`、`@testing-library/jest-dom`。
 
-新建 `src/test/setup.ts`:jsdom 下 antd 所需 polyfill(`matchMedia`、`ResizeObserver`),在 `vite.config.ts` 的 `test.setupFiles` 注册。
+新建 `src/test/setup.ts`:jsdom 下 antd 所需 polyfill(`matchMedia`、`ResizeObserver`),并包装 RTL `render` 加 zhCN `ConfigProvider`(与 `main.tsx` 一致,否则 antd 默认按钮文案为 enUS,中文可访问名断言失败),在 `vite.config.ts` 的 `test.setupFiles` 注册。
 
 | 测试文件 | 覆盖 |
 |---|---|
