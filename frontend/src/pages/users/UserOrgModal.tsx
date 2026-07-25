@@ -42,9 +42,18 @@ export default function UserOrgModal({ user, onClose, onSuccess }: Props) {
       setCandidates([]);
       return;
     }
+    let cancelled = false;
     listDeptMembers(deptId, { page: 1, page_size: 100 })
-      .then((resp) => setCandidates(resp.items.filter((m) => m.id !== user.id)))
-      .catch(() => setCandidates([]));
+      .then((resp) => {
+        if (cancelled) return;
+        setCandidates(resp.items.filter((m) => m.id !== user.id));
+      })
+      .catch(() => {
+        if (!cancelled) setCandidates([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [user, deptId]);
 
   const treeData = useMemo(() => toTreeSelectData(tree), [tree]);

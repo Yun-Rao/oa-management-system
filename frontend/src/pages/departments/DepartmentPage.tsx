@@ -55,25 +55,30 @@ export default function DepartmentPage() {
     if (allowed) void fetchTree();
   }, [allowed, fetchTree]);
 
-  const fetchMembers = useCallback(async (deptId: string, page: number) => {
+  useEffect(() => {
+    if (!allowed || !selectedId) return;
+    let cancelled = false;
     setMembersLoading(true);
     setMembersError(null);
-    try {
-      const resp = await listDeptMembers(deptId, { page, page_size: PAGE_SIZE });
-      setMembers(resp.items);
-      setMembersTotal(resp.total);
-    } catch (e) {
-      setMembers([]);
-      setMembersTotal(0);
-      setMembersError(errMsg(e));
-    } finally {
-      setMembersLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (allowed && selectedId) void fetchMembers(selectedId, membersPage);
-  }, [allowed, selectedId, membersPage, fetchMembers]);
+    listDeptMembers(selectedId, { page: membersPage, page_size: PAGE_SIZE })
+      .then((resp) => {
+        if (cancelled) return;
+        setMembers(resp.items);
+        setMembersTotal(resp.total);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setMembers([]);
+        setMembersTotal(0);
+        setMembersError(errMsg(e));
+      })
+      .finally(() => {
+        if (!cancelled) setMembersLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [allowed, selectedId, membersPage]);
 
   function onSelectDept(id: string) {
     if (id === selectedId) return;

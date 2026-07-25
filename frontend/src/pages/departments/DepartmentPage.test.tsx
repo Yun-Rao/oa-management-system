@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -120,5 +120,37 @@ describe("DepartmentPage", () => {
     await waitFor(() => expect(deleteDepartment).toHaveBeenCalledWith("d5"));
     // 删除后重新拉树
     await waitFor(() => expect(listDeptTree).toHaveBeenCalledTimes(2));
+  });
+
+  it("竞态:旧部门慢响应不覆盖新选中部门的成员", async () => {
+    const d5Member: UserResponse = {
+      id: "u9",
+      email: "c@x.com",
+      name: "李市场",
+      is_active: true,
+      roles: [],
+      department: { id: "d5", name: "市场部" },
+      manager: null,
+    };
+    let resolveD1!: (v: { items: UserResponse[]; total: number; page: number; page_size: number }) => void;
+    const d1Promise = new Promise<{ items: UserResponse[]; total: number; page: number; page_size: number }>(
+      (res) => {
+        resolveD1 = res;
+      }
+    );
+    vi.mocked(listDeptMembers).mockImplementation(async (id: string) =>
+      id === "d1" ? d1Promise : { items: [d5Member], total: 1, page: 1, page_size: 20 }
+    );
+    renderPage();
+    // 默认选中的技术部成员请求挂起中,直接切换到市场部
+    const user = userEvent.setup();
+    await user.click(await screen.findByText("市场部(0)"));
+    expect(await screen.findByText("李市场")).toBeInTheDocument();
+    // 旧部门慢响应到达,不应覆盖
+    await act(async () => {
+      resolveD1({ items: [member], total: 1, page: 1, page_size: 20 });
+    });
+    expect(screen.queryByText("张三")).not.toBeInTheDocument();
+    expect(screen.getByText("李市场")).toBeInTheDocument();
   });
 });
