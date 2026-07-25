@@ -84,7 +84,7 @@ describe("DepartmentPage", () => {
   it("树渲染,默认选中第一个根部门并拉取其成员", async () => {
     renderPage();
     expect(await screen.findByText("技术部(1)")).toBeInTheDocument();
-    expect(screen.getByText("前端组(0)")).toBeInTheDocument();
+    expect(await screen.findByText("前端组(0)")).toBeInTheDocument();
     await waitFor(() =>
       expect(listDeptMembers).toHaveBeenCalledWith("d1", { page: 1, page_size: 20 })
     );

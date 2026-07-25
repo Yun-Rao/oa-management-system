@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Card, message } from "antd";
+import { Alert, App, Card } from "antd";
 import { Navigate } from "react-router-dom";
 
 import { ApiError } from "../../api/client";
@@ -18,6 +18,7 @@ function errMsg(e: unknown): string {
 }
 
 export default function DepartmentPage() {
+  const { message } = App.useApp();
   const hasPermission = useAuthStore((s) => s.hasPermission);
   const allowed = hasPermission("department:list");
   const canCreate = hasPermission("department:create");

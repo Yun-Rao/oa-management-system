@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Button, Card, Input, Popconfirm, Space, Table, Tag, message } from "antd";
+import { Alert, App, Button, Card, Input, Popconfirm, Space, Table, Tag } from "antd";
 import { Navigate } from "react-router-dom";
 
 import { ApiError } from "../../api/client";
@@ -17,6 +17,7 @@ function errMsg(e: unknown): string {
 }
 
 export default function UserListPage() {
+  const { message } = App.useApp();
   const hasPermission = useAuthStore((s) => s.hasPermission);
   const allowed = hasPermission("user:list");
 
