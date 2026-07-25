@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { Spin } from "antd";
 
@@ -7,29 +7,22 @@ import { useAuthStore } from "../store/auth";
 export default function RequireAuth({ children }: { children: ReactNode }) {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
     if (token && !user) {
-      setLoading(true);
+      // 幂等 GET,StrictMode 双调用无害;失败即登出,由 !token 分支跳转 /login。
+      // 渲染判据只看 user 是否就绪,不引入本地 loading 态(避免竞态永久加载)。
       useAuthStore
         .getState()
         .fetchMe()
-        .catch(() => useAuthStore.getState().logout())
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
+        .catch(() => useAuthStore.getState().logout());
     }
-    return () => {
-      cancelled = true;
-    };
   }, [token, user]);
 
   if (!token) {
     return <Navigate to="/login" replace />;
   }
-  if (loading || !user) {
+  if (!user) {
     return (
       <div
         style={{

@@ -4,6 +4,7 @@ import MainLayout from "./components/MainLayout";
 import RequireAuth from "./components/RequireAuth";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import UserListPage from "./pages/users/UserListPage";
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -14,7 +15,10 @@ const router = createBrowserRouter([
         <MainLayout />
       </RequireAuth>
     ),
-    children: [{ index: true, element: <HomePage /> }],
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: "users", element: <UserListPage /> },
+    ],
   },
 ]);
 

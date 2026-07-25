@@ -36,3 +36,32 @@ export interface ApiErrorBody {
     message: string;
   };
 }
+
+export interface UserResponse {
+  id: string;
+  email: string;
+  name: string;
+  is_active: boolean;
+  roles: RoleBrief[];
+  department: DepartmentBrief | null;
+  manager: UserBrief | null;
+}
+
+export interface UserListResponse {
+  items: UserResponse[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface PermissionBrief {
+  code: string;
+  name: string;
+}
+
+export interface RoleResponse {
+  code: string;
+  name: string;
+  description: string | null;
+  permissions: PermissionBrief[];
+}

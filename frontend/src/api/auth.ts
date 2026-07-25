@@ -10,3 +10,10 @@ export async function getMe(): Promise<CurrentUser> {
   const { data } = await client.get<CurrentUser>("/auth/me");
   return data;
 }
+
+export async function changePassword(oldPassword: string, newPassword: string): Promise<void> {
+  await client.post("/auth/change-password", {
+    old_password: oldPassword,
+    new_password: newPassword,
+  });
+}
