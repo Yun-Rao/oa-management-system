@@ -99,7 +99,7 @@ interface AuthState {
 | `/login` | LoginPage(占位) | 无 |
 | `/` | MainLayout → HomePage(占位) | RequireAuth |
 
-后续模块在 MainLayout 下加子路由。`RequireAuth`:无 token → `<Navigate to="/login">`;有 token 无 user → 触发 fetchMe 并显示加载态。
+后续模块在 MainLayout 下加子路由。`RequireAuth`:无 token → `<Navigate to="/login">`;有 token 无 user → 触发 fetchMe 并以 Spin 占位。user 就绪是渲染子内容的唯一判据——不引入本地 loading 态(曾因此与 StrictMode 双 effect 竞态致永久加载);fetchMe 为幂等 GET,双调用无害;fetchMe 失败 → logout 清 token → 回落无 token 分支跳 /login。
 
 ### 4.4 菜单配置(components/menu.ts)
 
