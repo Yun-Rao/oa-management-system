@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -122,5 +122,35 @@ describe("UserOrgModal", () => {
     await user.click(screen.getByRole("button", { name: "确 定" }));
     expect(await screen.findByText("直属上级须属于同一部门")).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("竞态:切换部门后旧部门慢响应不覆盖新候选", async () => {
+    let resolveD1!: (v: { items: UserResponse[]; total: number; page: number; page_size: number }) => void;
+    const d1Promise = new Promise<{ items: UserResponse[]; total: number; page: number; page_size: number }>(
+      (res) => {
+        resolveD1 = res;
+      }
+    );
+    vi.mocked(listDeptMembers).mockImplementation(async (id: string) =>
+      id === "d1" ? d1Promise : { items: d5Members, total: 1, page: 1, page_size: 100 }
+    );
+    render(<UserOrgModal user={target} onClose={() => {}} onSuccess={() => {}} />);
+    // 初始部门(d1)候选请求挂起中,直接切换到市场部
+    await deptFormItem().findByText("技术部");
+    const user = userEvent.setup();
+    await user.click(deptFormItem().getByRole("combobox"));
+    const treeDropdown = await screen.findByRole("tree");
+    await user.click(within(treeDropdown).getByText("市场部"));
+    await waitFor(() =>
+      expect(listDeptMembers).toHaveBeenCalledWith("d5", { page: 1, page_size: 100 })
+    );
+    // 旧部门慢响应到达,不应覆盖市场部候选
+    await act(async () => {
+      resolveD1({ items: d1Members, total: 2, page: 1, page_size: 100 });
+    });
+    await user.click(managerFormItem().getByRole("combobox"));
+    const listbox = await screen.findByRole("listbox");
+    expect(await within(listbox).findByLabelText("李市场")).toBeInTheDocument();
+    expect(within(listbox).queryByLabelText("王主管")).not.toBeInTheDocument();
   });
 });
