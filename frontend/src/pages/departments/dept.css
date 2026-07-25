@@ -1,0 +1,7 @@
+.dept-tree-actions {
+  visibility: hidden;
+  margin-left: 8px;
+}
+.dept-tree-node:hover .dept-tree-actions {
+  visibility: visible;
+}

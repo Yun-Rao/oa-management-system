@@ -7,9 +7,12 @@ vi.mock("../../api/users", () => ({
   listUsers: vi.fn(),
   setUserStatus: vi.fn(),
   assignRoles: vi.fn(),
+  updateUserOrg: vi.fn(),
 }));
 vi.mock("../../api/roles", () => ({ listRoles: vi.fn() }));
+vi.mock("../../api/departments", () => ({ listDeptTree: vi.fn(), listDeptMembers: vi.fn() }));
 vi.mock("./UserFormModal", () => ({ default: () => null }));
+vi.mock("./UserOrgModal", () => ({ default: () => null }));
 
 import { listRoles } from "../../api/roles";
 import { assignRoles, listUsers, setUserStatus } from "../../api/users";
@@ -108,5 +111,11 @@ describe("UserListPage", () => {
     const [id, codes] = vi.mocked(assignRoles).mock.calls[0];
     expect(id).toBe("u1");
     expect([...codes].sort()).toEqual(["admin", "employee"]);
+  });
+
+  it("归属:admin 可见入口,点击打开 UserOrgModal", async () => {
+    renderPage();
+    await screen.findByText("张三");
+    expect(screen.getByRole("button", { name: "归属" })).toBeInTheDocument();
   });
 });

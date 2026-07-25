@@ -1,5 +1,5 @@
 import { client } from "./client";
-import type { UserListResponse, UserResponse } from "../types/api";
+import type { UserListResponse, UserOrgUpdate, UserResponse } from "../types/api";
 
 export interface ListUsersParams {
   page: number;
@@ -43,5 +43,10 @@ export async function assignRoles(id: string, roleCodes: string[]): Promise<User
   const { data } = await client.put<UserResponse>(`/users/${id}/roles`, {
     role_codes: roleCodes,
   });
+  return data;
+}
+
+export async function updateUserOrg(id: string, body: UserOrgUpdate): Promise<UserResponse> {
+  const { data } = await client.patch<UserResponse>(`/users/${id}/org`, body);
   return data;
 }
