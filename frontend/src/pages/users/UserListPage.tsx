@@ -8,6 +8,7 @@ import { useAuthStore } from "../../store/auth";
 import type { UserResponse } from "../../types/api";
 import RoleAssignModal from "./RoleAssignModal";
 import UserFormModal from "./UserFormModal";
+import UserOrgModal from "./UserOrgModal";
 
 const PAGE_SIZE = 20;
 
@@ -29,6 +30,7 @@ export default function UserListPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<UserResponse | null>(null);
   const [assigning, setAssigning] = useState<UserResponse | null>(null);
+  const [orgEditing, setOrgEditing] = useState<UserResponse | null>(null);
 
   const fetchList = useCallback(async (p: number, kw: string) => {
     setLoading(true);
@@ -105,6 +107,11 @@ export default function UserListPage() {
           <Button type="link" size="small" onClick={() => setAssigning(u)}>
             分配角色
           </Button>
+          {hasPermission("user:update") && (
+            <Button type="link" size="small" onClick={() => setOrgEditing(u)}>
+              归属
+            </Button>
+          )}
           <Popconfirm
             title={u.is_active ? "确认禁用该用户?" : "确认启用该用户?"}
             onConfirm={() => void onToggleStatus(u)}
@@ -171,6 +178,14 @@ export default function UserListPage() {
         onClose={() => setAssigning(null)}
         onSuccess={() => {
           message.success("角色已更新");
+          void fetchList(page, search);
+        }}
+      />
+      <UserOrgModal
+        user={orgEditing}
+        onClose={() => setOrgEditing(null)}
+        onSuccess={() => {
+          message.success("归属已更新");
           void fetchList(page, search);
         }}
       />
