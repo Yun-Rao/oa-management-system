@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../api/leaves", () => ({ rejectLeave: vi.fn() }));
@@ -43,5 +44,29 @@ describe("RejectModal", () => {
     await user.click(screen.getByRole("button", { name: "确 定" }));
     expect(await screen.findByText("单据已终态")).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("关闭后重开:旧错误 Alert 被清除", async () => {
+    // 用有状态的 Harness 驱动 leaveId(不用 rerender:setup 的 render 包装在
+    // ConfigProvider/AntdApp 内,rerender 会替换根节点导致组件重挂载、测不出残留状态)
+    vi.mocked(rejectLeave).mockRejectedValue(new ApiError("CONFLICT", "单据已终态"));
+    function Harness() {
+      const [leaveId, setLeaveId] = useState<string | null>("l1");
+      return (
+        <>
+          <button onClick={() => setLeaveId("l1")}>reopen</button>
+          <RejectModal leaveId={leaveId} onClose={() => setLeaveId(null)} onSuccess={() => {}} />
+        </>
+      );
+    }
+    render(<Harness />);
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText("驳回原因"), "人手不足");
+    await user.click(screen.getByRole("button", { name: "确 定" }));
+    expect(await screen.findByText("单据已终态")).toBeInTheDocument();
+    await user.click(document.querySelector(".ant-modal-close") as HTMLElement);
+    await user.click(screen.getByRole("button", { name: "reopen" }));
+    await screen.findByLabelText("驳回原因");
+    expect(screen.queryByText("单据已终态")).toBeNull();
   });
 });

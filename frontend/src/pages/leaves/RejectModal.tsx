@@ -30,11 +30,16 @@ export default function RejectModal({ leaveId, onClose, onSuccess }: Props) {
     }
   }
 
+  function handleClose() {
+    setError(null);
+    onClose();
+  }
+
   return (
     <Modal
       title="驳回申请"
       open={leaveId !== null}
-      onCancel={onClose}
+      onCancel={handleClose}
       onOk={() => form.submit()}
       confirmLoading={submitting}
       destroyOnHidden

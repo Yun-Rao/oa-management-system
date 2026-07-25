@@ -43,11 +43,16 @@ export default function LeaveFormModal({ open, onClose, onSuccess }: Props) {
     }
   }
 
+  function handleClose() {
+    setError(null);
+    onClose();
+  }
+
   return (
     <Modal
       title="新建请假申请"
       open={open}
-      onCancel={onClose}
+      onCancel={handleClose}
       onOk={() => form.submit()}
       confirmLoading={submitting}
       destroyOnHidden
