@@ -77,13 +77,17 @@ async def test_me_includes_department_and_manager(client, db):
         manager_id=manager.id,
     )
     token = await login_token(client, "u@x.com", "Passw0rd!")
+    manager_id = str(manager.id)
+    # 清空 identity map,模拟生产环境独立会话:
+    # 防止 manager 因会话缓存命中而掩盖懒加载 MissingGreenlet 问题
+    db.expunge_all()
     resp = await client.get(
         "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
     )
     assert resp.status_code == 200
     body = resp.json()
     assert body["department"]["name"] == "技术部"
-    assert body["manager"]["id"] == str(manager.id)
+    assert body["manager"]["id"] == manager_id
 
 
 async def test_change_password_flow(client, db):
