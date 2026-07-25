@@ -43,20 +43,36 @@ export default function UserOrgModal({ user, onClose, onSuccess }: Props) {
       return;
     }
     let cancelled = false;
-    listDeptMembers(deptId, { page: 1, page_size: 100 })
-      .then((resp) => {
-        if (cancelled) return;
-        setCandidates(resp.items.filter((m) => m.id !== user.id));
-      })
-      .catch(() => {
+    (async () => {
+      try {
+        // 上级候选 = 部门全部成员(spec);单页 100 会截断,翻页拉全
+        const all: UserResponse[] = [];
+        for (let page = 1; ; page += 1) {
+          const resp = await listDeptMembers(deptId, { page, page_size: 100 });
+          all.push(...resp.items);
+          if (all.length >= resp.total || resp.items.length === 0) break;
+        }
+        if (!cancelled) setCandidates(all.filter((m) => m.id !== user.id));
+      } catch {
         if (!cancelled) setCandidates([]);
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };
   }, [user, deptId]);
 
   const treeData = useMemo(() => toTreeSelectData(tree), [tree]);
+
+  // 现任上级并入候选:拉取完成前(或极端截断)Select 不至于回显原始 UUID
+  const managerOptions = useMemo(() => {
+    const opts = candidates.map((m) => ({ value: m.id, label: m.name }));
+    const mgr = user?.manager;
+    if (mgr && user?.department?.id === deptId && !candidates.some((m) => m.id === mgr.id)) {
+      opts.unshift({ value: mgr.id, label: mgr.name });
+    }
+    return opts;
+  }, [candidates, user, deptId]);
 
   async function onFinish(values: OrgFormValues) {
     if (!user) return;
@@ -114,7 +130,7 @@ export default function UserOrgModal({ user, onClose, onSuccess }: Props) {
           <Select
             allowClear
             placeholder="先从部门成员中选择"
-            options={candidates.map((m) => ({ value: m.id, label: m.name }))}
+            options={managerOptions}
             disabled={!deptId}
             showSearch
             optionFilterProp="label"
