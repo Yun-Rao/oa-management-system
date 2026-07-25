@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import MainLayout from "./components/MainLayout";
 import RequireAuth from "./components/RequireAuth";
+import DepartmentPage from "./pages/departments/DepartmentPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import UserListPage from "./pages/users/UserListPage";
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "users", element: <UserListPage /> },
+      { path: "departments", element: <DepartmentPage /> },
     ],
   },
 ]);
