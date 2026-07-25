@@ -116,6 +116,7 @@ interface AuthState {
 ## 5. 错误处理
 
 - 统一在 client 拦截器规范化为 `ApiError`,页面/调用方用 AntD `message.error(err.message)` 提示
+- 消息提示机制:禁用 antd 静态 `message`(惰性独立 React root,React 18 并发下挂载时序不可靠,antd 已弃用);统一 `App.useApp()` 取 message 实例,`main.tsx` 以 `<AntdApp>` 包裹路由,测试 render 包装同样含 `<AntdApp>`(2026-07-25 修订)
 - 表单级字段错误由业务模块自行处理(P0#1 起)
 - 占位页不展示错误 UI,仅保证拦截器逻辑有单测覆盖
 

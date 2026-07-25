@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Form, Input, Modal, message } from "antd";
+import { Alert, App, Form, Input, Modal } from "antd";
 
 import { changePassword } from "../api/auth";
 import { ApiError } from "../api/client";
@@ -16,6 +16,7 @@ interface PwdFormValues {
 }
 
 export default function ChangePasswordModal({ open, onClose }: Props) {
+  const { message } = App.useApp();
   const [form] = Form.useForm<PwdFormValues>();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
