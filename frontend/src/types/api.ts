@@ -65,3 +65,22 @@ export interface RoleResponse {
   description: string | null;
   permissions: PermissionBrief[];
 }
+
+export interface DepartmentNode {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  member_count: number;
+  children: DepartmentNode[];
+}
+
+export interface DepartmentResponse {
+  id: string;
+  name: string;
+  parent_id: string | null;
+}
+
+export interface UserOrgUpdate {
+  department_id?: string | null;
+  manager_id?: string | null;
+}

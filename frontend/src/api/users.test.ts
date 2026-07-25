@@ -2,7 +2,7 @@ import MockAdapter from "axios-mock-adapter";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { client } from "./client";
-import { assignRoles, createUser, listUsers, setUserStatus, updateUser } from "./users";
+import { assignRoles, createUser, listUsers, setUserStatus, updateUser, updateUserOrg } from "./users";
 
 const mock = new MockAdapter(client);
 
@@ -70,5 +70,29 @@ describe("users api", () => {
     mock.onGet("/users").reply(403, { error: { code: "FORBIDDEN", message: "无权限" } });
     const err = await listUsers({ page: 1, page_size: 20 }).catch((e: unknown) => e);
     expect(err).toMatchObject({ code: "FORBIDDEN", message: "无权限" });
+  });
+});
+
+describe("users api updateUserOrg", () => {
+  it("PATCH /users/{id}/org 传部门与上级", async () => {
+    mock.onPatch("/users/u1/org").reply((config) => {
+      expect(JSON.parse(config.data as string)).toEqual({
+        department_id: "d1",
+        manager_id: "u2",
+      });
+      return [200, { id: "u1" }];
+    });
+    await updateUserOrg("u1", { department_id: "d1", manager_id: "u2" });
+  });
+
+  it("PATCH /users/{id}/org 清空语义(null)", async () => {
+    mock.onPatch("/users/u1/org").reply((config) => {
+      expect(JSON.parse(config.data as string)).toEqual({
+        department_id: null,
+        manager_id: null,
+      });
+      return [200, { id: "u1" }];
+    });
+    await updateUserOrg("u1", { department_id: null, manager_id: null });
   });
 });
