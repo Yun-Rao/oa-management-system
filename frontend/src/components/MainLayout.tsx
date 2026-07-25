@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Dropdown, Layout, Menu } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuthStore } from "../store/auth";
+import ChangePasswordModal from "./ChangePasswordModal";
 import { MENU_ITEMS } from "./menu";
 
 export default function MainLayout() {
@@ -9,6 +11,7 @@ export default function MainLayout() {
   const hasPermission = useAuthStore((s) => s.hasPermission);
   const navigate = useNavigate();
   const location = useLocation();
+  const [pwdOpen, setPwdOpen] = useState(false);
 
   const items = MENU_ITEMS.filter(
     (m) => m.permission === null || hasPermission(m.permission)
@@ -47,8 +50,12 @@ export default function MainLayout() {
         >
           <Dropdown
             menu={{
-              items: [{ key: "logout", label: "退出登录" }],
+              items: [
+                { key: "change-password", label: "修改密码" },
+                { key: "logout", label: "退出登录" },
+              ],
               onClick: ({ key }) => {
+                if (key === "change-password") setPwdOpen(true);
                 if (key === "logout") {
                   useAuthStore.getState().logout();
                   navigate("/login");
@@ -63,6 +70,7 @@ export default function MainLayout() {
           <Outlet />
         </Layout.Content>
       </Layout>
+      <ChangePasswordModal open={pwdOpen} onClose={() => setPwdOpen(false)} />
     </Layout>
   );
 }
