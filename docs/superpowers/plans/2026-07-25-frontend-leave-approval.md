@@ -368,7 +368,6 @@ git commit -m "feat(frontend): P0#3 请假审批 api 层 + 类型 + 中文映射
 ```tsx
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import dayjs from "dayjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../api/leaves", () => ({ createLeave: vi.fn() }));
@@ -440,7 +439,7 @@ describe("LeaveFormModal", () => {
 });
 ```
 
-说明:RangePicker 在 jsdom 中用 placeholder 输入框键入日期是可行路径;`{enter}` 提交选择。`dayjs` import 仅备需要(如断言面板值)。
+说明:RangePicker 在 jsdom 中用 placeholder 输入框键入日期是可行路径;`{enter}` 提交选择。(2026-07-25 偏离:删除未使用的 dayjs import,noUnusedLocals 下 tsc 报错)
 
 - [ ] **Step 2: 运行确认失败**
 

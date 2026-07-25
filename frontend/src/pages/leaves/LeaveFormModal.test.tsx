@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import dayjs from "dayjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../api/leaves", () => ({ createLeave: vi.fn() }));
