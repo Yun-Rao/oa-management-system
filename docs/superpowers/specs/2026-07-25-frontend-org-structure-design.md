@@ -143,16 +143,16 @@ export async function updateUserOrg(id: string, body: UserOrgUpdate): Promise<Us
 
 **自动化门禁:**
 
-- [ ] `npm test` 全绿(P0#1 45 + 本期新增)
-- [ ] `tsc --noEmit` 零错误,`vite build` 成功
+- [x] `npm test` 全绿(P0#1 45 + 本期新增)
+- [x] `tsc --noEmit` 零错误,`vite build` 成功
 
 **浏览器实测(由执行 Agent 使用 chrome-devtools 驱动真实浏览器完成,非人工点检;前置:后端 :8000 + dev server :5173 代理;截图存档至 `.superpowers/sdd/acceptance/`):**
 
-- [ ] admin 进部门管理页:树渲染(含 member_count),默认选中根部门,右侧成员列表渲染
-- [ ] 新建根部门/子部门成功,树即时刷新;同级重名 → 错误提示
-- [ ] 编辑部门改名生效;TreeSelect 移动部门到另一父节点生效;移动到自身后代 → 409 错误提示
-- [ ] 删除空部门成功;删除有员工的部门 → 409 错误提示
-- [ ] 用户管理"归属":为用户设置部门+直属上级成功,列表部门列更新;上级选其他部门的人 → 422 错误提示
-- [ ] manager 账号(seed 或验收创建)登录:菜单有"部门管理",无 CRUD 按钮;查看本部门成员正常;查看其他部门成员 → 403 错误提示
-- [ ] 无 department:list 权限账号(employee)登录:菜单无"部门管理",直访 /departments 跳回首页
-- [ ] 每个场景截图存档至 `.superpowers/sdd/acceptance/`,作为验收证据
+- [x] admin 进部门管理页:树渲染(含 member_count),默认选中根部门,右侧成员列表渲染
+- [x] 新建根部门/子部门成功,树即时刷新;同级重名 → 错误提示
+- [x] 编辑部门改名生效;TreeSelect 移动部门到另一父节点生效;移动到自身后代 → 409 错误提示
+- [x] 删除空部门成功;删除有员工的部门 → 409 错误提示
+- [x] 用户管理"归属":为用户设置部门+直属上级成功,列表部门列更新;上级选其他部门的人 → 422 错误提示
+- [x] manager 账号(seed 或验收创建)登录:菜单有"部门管理",无 CRUD 按钮;查看本部门成员正常;查看其他部门成员 → 403 错误提示
+- [x] 无 department:list 权限账号(employee)登录:菜单无"部门管理",直访 /departments 跳回首页
+- [x] 每个场景截图存档至 `.superpowers/sdd/acceptance/`,作为验收证据
