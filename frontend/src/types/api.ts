@@ -84,3 +84,37 @@ export interface UserOrgUpdate {
   department_id?: string | null;
   manager_id?: string | null;
 }
+
+export type LeaveType = "personal" | "sick" | "annual" | "compensatory";
+export type LeaveStatus = "pending" | "approved" | "rejected" | "canceled";
+
+export interface LeaveResponse {
+  id: string;
+  type: string;
+  start_date: string;
+  end_date: string;
+  reason: string;
+  status: string;
+  applicant: UserBrief;
+  approver: UserBrief;
+  created_at: string;
+}
+
+export interface LeaveHistoryItem {
+  from_status: string | null;
+  to_status: string;
+  actor: UserBrief;
+  comment: string | null;
+  created_at: string;
+}
+
+export interface LeaveDetailResponse extends LeaveResponse {
+  history: LeaveHistoryItem[];
+}
+
+export interface LeaveListResponse {
+  items: LeaveResponse[];
+  total: number;
+  page: number;
+  page_size: number;
+}
