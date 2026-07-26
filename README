@@ -12,9 +12,9 @@
 - 部署：Docker + Docker Compose
 
 ## 功能模块
-- [ ] 用户认证（登录/JWT鉴权）
-- [ ] 角色权限管理（RBAC）
-- [ ] 组织架构管理（部门/职位）
+- [x] 用户认证（登录/JWT鉴权）
+- [x] 角色权限管理（RBAC）
+- [x] 组织架构管理（部门/职位）
 - [ ] 审批流程（请假/报销）
 - [ ] 消息通知
 
@@ -54,6 +54,20 @@ uvicorn app.main:app --reload
 pytest
 ```
 
+```bash
+# 6. 启动前端(另开终端)
+cd frontend
+npm install
+npm run dev    # http://localhost:5173,接口代理到 :8000
+
+# 测试 / 类型检查 / 构建
+npm test
+npm run typecheck
+npm run build
+```
+
 接口文档: http://localhost:8000/docs
 
-注意:seed 按 `SEED_ADMIN_EMAIL` 判重,修改该值后重跑会创建一个新的 admin 账号。
+注意:
+- seed 按 `SEED_ADMIN_EMAIL` 判重,修改该值后重跑会创建一个新的 admin 账号。
+- Windows 本机若 vite 代理挂起(localhost 解析到 IPv6),用 `NODE_OPTIONS=--dns-result-order=ipv4first npm run dev` 启动前端。
