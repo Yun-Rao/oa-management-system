@@ -218,6 +218,8 @@ ALL_PERMISSIONS = [
     ("expense:approve", "审批报销申请(一级)"),
     ("expense:approve_l2", "审批报销申请(二级)"),
     ("expense:list_all", "查看全部报销记录"),
+    ("dashboard:view", "查看数据看板"),
+    ("dashboard:view_all", "查看全公司看板"),
 ]
 
 
