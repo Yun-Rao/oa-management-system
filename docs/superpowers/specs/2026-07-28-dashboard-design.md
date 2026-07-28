@@ -82,11 +82,13 @@
 | 层 | 文件 | 职责 |
 |---|---|---|
 | API | `backend/app/api/v1/dashboard.py`(新建) | 路由;month 解析/校验;`require_permission("dashboard:view")`;`main.py` 注册 |
-| Service | `backend/app/services/dashboard_service.py`(新建) | `DashboardService(db).get_summary(month: date, user: User)`;计算月首/月末;判定部门作用域;组装响应 |
-| Repository | `backend/app/repositories/dashboard_repository.py`(新建) | `leave_stats(month_start, month_end, department_id)` / `expense_stats(...)` / `approval_durations(...)`,纯 SQL 聚合返回行元组 |
+| Service | `backend/app/services/dashboard_service.py`(新建) | `DashboardService(db).get_summary(month: date \| None, user: User)`;计算月首/月末;判定部门作用域;**聚合**(分组/求和/平均/跨月切分)并组装响应 |
+| Repository | `backend/app/repositories/dashboard_repository.py`(新建) | `leave_rows(month_start, month_end, department_id)` / `expense_rows(...)` / `duration_rows(...)`;SQL 只做状态/月份/部门过滤,**返回候选行**,不做聚合 |
 | Schema | `backend/app/schemas/dashboard.py`(新建) | `DashboardSummaryResponse` / `LeaveStatItem` / `ExpenseStatItem` / `ApprovalDurationItem` |
 
-时效实现提示(spec 只锁口径,不锁实现):终态行取每单 history 中 `to_status ∈ 终态` 的 `max(created_at)`,子查询 join 回本单求平均;请假终态 `{approved, rejected}`,报销终态 `{approved, rejected}`。
+**聚合位置说明**:日期/时间戳相减在 SQLite 与 Postgres 间语法不可移植(`julianday` vs 日期减法),测试库为内存 SQLite,故 SQL 保持可移植的纯过滤,分组/天数切分/平均时长全部在 Python 服务层完成(本期数据量小,性能无忧)。
+
+时效实现提示(spec 只锁口径,不锁实现):终态行取 history 中 `to_status ∈ {approved, rejected}` 的行(状态机保证每单至多一行),其 `created_at` 落在当月即计入。
 
 ## 6. 权限与 seed
 
