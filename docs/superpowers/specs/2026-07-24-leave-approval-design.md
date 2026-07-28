@@ -31,7 +31,7 @@
 | 无直属上级 | 提交直接 422 拒绝,提示联系管理员设置上级,不做兜底流转 |
 | 审批权限 | 仅 approver_id 本人可审批,admin 不代批(admin 走全部记录查询) |
 | 撤回 | 仅申请人本人、仅 pending 状态,状态变为 canceled(留痕) |
-| 通知 | 本期不写通知代码;leave_status_history 即 P1 通知模块的数据源 |
+| 通知 | 本期不写通知代码;leave_status_history 即 P1 通知模块的数据源(2026-07-26 细化:通知在动作点由 service 同步生成,见 docs/superpowers/specs/2026-07-26-backend-notification-design.md §2) |
 
 ## 3. 数据模型
 

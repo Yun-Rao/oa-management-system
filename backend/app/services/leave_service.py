@@ -13,11 +13,14 @@ from app.models.leave import LeaveRequest, LeaveStatusHistory
 from app.models.user import User
 from app.repositories.leave_repository import LeaveRepository
 from app.schemas.leave import LeaveCreate
+from app.services.notification_service import NotificationService
 
 
 class LeaveService:
     def __init__(self, db: AsyncSession):
+        self.db = db
         self.leaves = LeaveRepository(db)
+        self.notifications = NotificationService(db)
 
     async def create_leave(
         self, data: LeaveCreate, applicant: User
@@ -31,6 +34,7 @@ class LeaveService:
         ):
             raise ConflictError("该时间段与已有请假申请重叠")
         leave = LeaveRequest(
+            id=uuid.uuid4(),
             applicant_id=applicant.id,
             approver_id=applicant.manager_id,
             type=data.type,
@@ -44,6 +48,7 @@ class LeaveService:
             to_status="pending",
             actor_id=applicant.id,
         )
+        self.notifications.notify_leave_submitted(leave, applicant.name)
         return await self.leaves.create(leave, history)
 
     async def get_detail(self, leave_id: uuid.UUID, user: User) -> LeaveRequest:
@@ -70,6 +75,7 @@ class LeaveService:
         leave = await self._get_or_404(leave_id)
         self._check_approver(leave, user)
         self._check_pending(leave)
+        self.notifications.notify_leave_approved(leave)
         return await self.leaves.transition(
             leave, "pending", "approved", user.id, None
         )
@@ -82,6 +88,7 @@ class LeaveService:
         self._check_pending(leave)
         if not reason.strip():
             raise ValidationError("驳回必须填写原因")
+        self.notifications.notify_leave_rejected(leave, reason)
         return await self.leaves.transition(
             leave, "pending", "rejected", user.id, reason
         )

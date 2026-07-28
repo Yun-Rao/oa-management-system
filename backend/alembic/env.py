@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.models.base import Base
 
 # 导入所有模型,确保 metadata 完整(autogenerate 依赖)
-from app.models import associations, department, leave, permission, role, user  # noqa: F401
+from app.models import associations, department, leave, notification, permission, role, user  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
