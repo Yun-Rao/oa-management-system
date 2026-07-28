@@ -12,6 +12,7 @@ from app.main import app
 from app.models.base import Base
 from app.models.department import Department
 from app.models.leave import LeaveRequest
+from app.models.notification import Notification  # noqa: F401  # 注册进 metadata,create_all 用
 from app.models.permission import Permission
 from app.models.role import Role
 from app.models.user import User
