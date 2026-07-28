@@ -2,6 +2,7 @@ import uuid
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.user import User
 
@@ -11,7 +12,14 @@ class UserRepository:
         self.db = db
 
     async def get_by_id(self, user_id: uuid.UUID) -> User | None:
-        return await self.db.get(User, user_id)
+        # db.get() 不会为自引用关系 manager 触发 selectin 加载,
+        # 显式 selectinload 避免异步上下文中访问时触发懒加载 MissingGreenlet
+        result = await self.db.execute(
+            select(User)
+            .options(selectinload(User.manager))
+            .where(User.id == user_id)
+        )
+        return result.scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> User | None:
         result = await self.db.execute(select(User).where(User.email == email))
