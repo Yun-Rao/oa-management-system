@@ -20,6 +20,13 @@ def _leave_span(leave: LeaveRequest) -> str:
     return f"{leave.start_date.isoformat()} ~ {leave.end_date.isoformat()}"
 
 
+def _clamp_content(text: str) -> str:
+    # Notification.content is String(500); Postgres enforces varchar(500),
+    # so clamp here to keep the surrounding action (e.g. leave reject) from
+    # failing on the notification INSERT.
+    return text[:500]
+
+
 class NotificationService:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -34,7 +41,9 @@ class NotificationService:
                 user_id=leave.approver_id,
                 type="leave_submitted",
                 title="新的待审批任务",
-                content=f"{applicant_name} 提交了 {_leave_span(leave)} 的{label}申请,待您审批",
+                content=_clamp_content(
+                    f"{applicant_name} 提交了 {_leave_span(leave)} 的{label}申请,待您审批"
+                ),
                 ref_type="leave",
                 ref_id=leave.id,
             )
@@ -47,7 +56,9 @@ class NotificationService:
                 user_id=leave.applicant_id,
                 type="leave_approved",
                 title="请假申请已通过",
-                content=f"您 {_leave_span(leave)} 的{label}申请已通过",
+                content=_clamp_content(
+                    f"您 {_leave_span(leave)} 的{label}申请已通过"
+                ),
                 ref_type="leave",
                 ref_id=leave.id,
             )
@@ -60,7 +71,9 @@ class NotificationService:
                 user_id=leave.applicant_id,
                 type="leave_rejected",
                 title="请假申请已驳回",
-                content=f"您 {_leave_span(leave)} 的{label}申请已被驳回:{reason}",
+                content=_clamp_content(
+                    f"您 {_leave_span(leave)} 的{label}申请已被驳回:{reason}"
+                ),
                 ref_type="leave",
                 ref_id=leave.id,
             )

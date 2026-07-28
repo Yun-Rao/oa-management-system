@@ -71,6 +71,26 @@ async def test_notify_leave_rejected_content(db):
     assert n.content == "您 2026-08-01 ~ 2026-08-02 的事假申请已被驳回:人手不足"
 
 
+async def test_notify_leave_rejected_truncates_long_reason(db):
+    from app.services.notification_service import NotificationService
+
+    approver = await make_user(db, email="m@x.com")
+    applicant = await make_user(db, email="e@x.com", manager_id=approver.id)
+    leave = await make_leave(db, applicant, approver, type="personal")
+
+    reason = "x" * 500
+    NotificationService(db).notify_leave_rejected(leave, reason)
+    await db.commit()
+
+    from app.repositories.notification_repository import NotificationRepository
+    items, total = await NotificationRepository(db).list_mine(applicant.id, None, 0, 20)
+    assert total == 1
+    n = items[0]
+    prefix = "您 2026-08-01 ~ 2026-08-02 的事假申请已被驳回:"
+    assert len(n.content) == 500
+    assert n.content == prefix + "x" * (500 - len(prefix))
+
+
 async def test_mark_read_not_found(db):
     import uuid
 
