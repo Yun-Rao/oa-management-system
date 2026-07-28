@@ -15,6 +15,7 @@ ALL_PERMISSION_CODES = {
     "leave:create", "leave:list", "leave:approve", "leave:list_all",
     "expense:create", "expense:list", "expense:approve",
     "expense:approve_l2", "expense:list_all",
+    "dashboard:view", "dashboard:view_all",
 }
 
 DEPARTMENT_PERMISSION_CODES = {
@@ -44,6 +45,7 @@ async def test_seed_creates_permissions_roles_and_admin(db):
         "expense:create",
         "expense:list",
         "expense:approve",
+        "dashboard:view",
     }
 
     result = await db.execute(select(User).where(User.email == settings.SEED_ADMIN_EMAIL))
@@ -118,6 +120,7 @@ async def test_seed_repairs_manager_permissions_on_rerun(db):
         "expense:create",
         "expense:list",
         "expense:approve",
+        "dashboard:view",
     }
 
 
@@ -164,6 +167,28 @@ async def test_seed_assigns_expense_permissions(db):
     assert {"expense:create", "expense:list", "expense:approve"} <= manager_perms
     assert "expense:approve_l2" not in manager_perms
     assert "expense:list_all" not in manager_perms
+    assert employee_perms == {
+        "leave:create",
+        "leave:list",
+        "expense:create",
+        "expense:list",
+    }
+
+
+async def test_seed_assigns_dashboard_permissions(db):
+    await seed(db)
+
+    perms = {p.code for p in (await db.execute(select(Permission))).scalars()}
+    expected = {"dashboard:view", "dashboard:view_all"}
+    assert expected <= perms
+
+    roles = {r.code: r for r in (await db.execute(select(Role))).scalars()}
+    admin_perms = {p.code for p in roles["admin"].permissions}
+    manager_perms = {p.code for p in roles["manager"].permissions}
+    employee_perms = {p.code for p in roles["employee"].permissions}
+    assert expected <= admin_perms
+    assert "dashboard:view" in manager_perms
+    assert "dashboard:view_all" not in manager_perms
     assert employee_perms == {
         "leave:create",
         "leave:list",
