@@ -62,6 +62,21 @@ async def test_list_todo_l2_pool_and_merged(db):
     assert total == 2
 
 
+async def test_list_todo_no_permission_returns_empty(db):
+    from app.repositories.expense_repository import ExpenseRepository
+
+    mgr = await make_user(db, email="m@x.com")
+    emp = await make_user(db, email="e@x.com", manager_id=mgr.id)
+    await make_expense(db, emp, mgr, status="pending_l1")
+    await make_expense(db, emp, None, status="pending_l2")
+
+    items, total = await ExpenseRepository(db).list_todo(
+        emp.id, False, False, 0, 20
+    )
+    assert items == []
+    assert total == 0
+
+
 async def test_list_all_filters(db):
     from app.repositories.expense_repository import ExpenseRepository
 

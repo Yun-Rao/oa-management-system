@@ -123,6 +123,8 @@ class ExpenseRepository:
             )
         if can_l2:
             clauses.append(ExpenseRequest.status == "pending_l2")
+        if not clauses:
+            return [], 0
         condition = or_(*clauses)
         total = (
             await self.db.execute(
