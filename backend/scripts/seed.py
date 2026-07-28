@@ -27,6 +27,11 @@ PERMISSIONS = [
     ("leave:list", "查看我的申请"),
     ("leave:approve", "审批请假申请"),
     ("leave:list_all", "查看全部审批记录"),
+    ("expense:create", "提交/撤回报销申请"),
+    ("expense:list", "查看我的报销"),
+    ("expense:approve", "审批报销申请(一级)"),
+    ("expense:approve_l2", "审批报销申请(二级)"),
+    ("expense:list_all", "查看全部报销记录"),
 ]
 
 ROLES = [
@@ -44,8 +49,11 @@ ROLE_PERMISSIONS: dict[str, list[str] | None] = {
         "leave:create",
         "leave:list",
         "leave:approve",
+        "expense:create",
+        "expense:list",
+        "expense:approve",
     ],
-    "employee": ["leave:create", "leave:list"],
+    "employee": ["leave:create", "leave:list", "expense:create", "expense:list"],
 }
 
 

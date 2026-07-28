@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
 from datetime import date
+from decimal import Decimal
 
 from app.core.database import get_db
 from app.core.security import hash_password
@@ -14,6 +15,7 @@ from app.main import app
 from app.models.base import Base
 from app.models.department import Department
 from app.models.leave import LeaveRequest
+from app.models.expense import ExpenseAttachment, ExpenseRequest  # noqa: F401  # 注册进 metadata,create_all 用
 from app.models.notification import Notification
 from app.models.permission import Permission
 from app.models.role import Role
@@ -136,6 +138,29 @@ async def make_leave(
     return leave
 
 
+async def make_expense(
+    db,
+    applicant: User,
+    approver: User | None,
+    type="travel",
+    amount=Decimal("1999.00"),
+    reason="出差交通",
+    status="pending_l1",
+) -> ExpenseRequest:
+    e = ExpenseRequest(
+        applicant_id=applicant.id,
+        approver_id=approver.id if approver else None,
+        type=type,
+        amount=amount,
+        reason=reason,
+        status=status,
+    )
+    db.add(e)
+    await db.commit()
+    await db.refresh(e)
+    return e
+
+
 async def make_notification(
     db,
     user: User,
@@ -188,6 +213,11 @@ ALL_PERMISSIONS = [
     ("leave:list", "查看我的申请"),
     ("leave:approve", "审批请假申请"),
     ("leave:list_all", "查看全部审批记录"),
+    ("expense:create", "提交/撤回报销申请"),
+    ("expense:list", "查看我的报销"),
+    ("expense:approve", "审批报销申请(一级)"),
+    ("expense:approve_l2", "审批报销申请(二级)"),
+    ("expense:list_all", "查看全部报销记录"),
 ]
 
 
