@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
 from datetime import date
+from decimal import Decimal
 
 from app.core.database import get_db
 from app.core.security import hash_password
@@ -135,6 +136,29 @@ async def make_leave(
     await db.commit()
     await db.refresh(leave)
     return leave
+
+
+async def make_expense(
+    db,
+    applicant: User,
+    approver: User | None,
+    type="travel",
+    amount=Decimal("1999.00"),
+    reason="出差交通",
+    status="pending_l1",
+) -> ExpenseRequest:
+    e = ExpenseRequest(
+        applicant_id=applicant.id,
+        approver_id=approver.id if approver else None,
+        type=type,
+        amount=amount,
+        reason=reason,
+        status=status,
+    )
+    db.add(e)
+    await db.commit()
+    await db.refresh(e)
+    return e
 
 
 async def make_notification(
