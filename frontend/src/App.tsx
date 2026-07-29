@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import MainLayout from "./components/MainLayout";
 import RequireAuth from "./components/RequireAuth";
+import DashboardPage from "./pages/dashboard/DashboardPage";
 import DepartmentPage from "./pages/departments/DepartmentPage";
 import ExpensesPage from "./pages/expenses/ExpensesPage";
 import HomePage from "./pages/HomePage";
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { path: "departments", element: <DepartmentPage /> },
       { path: "leaves", element: <LeavesPage /> },
       { path: "expenses", element: <ExpensesPage /> },
+      { path: "dashboard", element: <DashboardPage /> },
       { path: "notifications", element: <NotificationsPage /> },
     ],
   },
