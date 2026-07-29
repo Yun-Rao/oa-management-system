@@ -6,6 +6,7 @@ import DepartmentPage from "./pages/departments/DepartmentPage";
 import HomePage from "./pages/HomePage";
 import LeavesPage from "./pages/leaves/LeavesPage";
 import LoginPage from "./pages/LoginPage";
+import NotificationsPage from "./pages/notifications/NotificationsPage";
 import UserListPage from "./pages/users/UserListPage";
 
 const router = createBrowserRouter([
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       { path: "users", element: <UserListPage /> },
       { path: "departments", element: <DepartmentPage /> },
       { path: "leaves", element: <LeavesPage /> },
+      { path: "notifications", element: <NotificationsPage /> },
     ],
   },
 ]);
