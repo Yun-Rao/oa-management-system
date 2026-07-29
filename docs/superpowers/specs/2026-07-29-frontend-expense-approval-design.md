@@ -11,7 +11,7 @@
 ## 1. 范围
 
 **本期做**:
-- (后端附加) `ExpenseResponse` 补 `applicant: UserBrief`、`approver: UserBrief | None` 字段,与 `LeaveResponse` 对齐——纯新增不破坏兼容,同步更新后端 spec §6
+- (后端附加) `ExpenseResponse` 的 `applicant_id`/`approver_id` 键替换为 `applicant: UserBrief`、`approver: UserBrief | None`,与 `LeaveResponse` 对齐——旧键从 JSON 移除,非纯新增;全仓检索确认无其他消费方,同步更新后端 spec §6
 - `/expenses` 路由 + 「报销审批」菜单项(permission `expense:list`)
 - 三 Tab 页面:我的申请 / 待我审批 / 全部记录(按权限过滤)
 - 新建报销 Modal:类型/金额/说明 + 1~5 个附件(jpg/jpeg/png/pdf,单个 ≤5MB),一体 multipart 提交
@@ -36,7 +36,7 @@
 | 金额处理 | 后端 Decimal 序列化为字符串,前端展示直接字符串 + `¥` 前缀;表单 `amount` 以字符串塞 FormData,全程不做浮点转换 |
 | 二级审批展示 | 状态 Tag 五级中文映射 + 详情 Modal「当前审批」行(L1 显示主管姓名,L2 显示 HR/Admin 权限池,终态显示 —)+ history Timeline 呈现每级 actor/时间/驳回原因 |
 | 通知联动 | NotificationsPage 的 `ref_type` 分发加 `"expense"` 分支,镜像 `openLeaveId` 模式生产 `openExpenseId` state;未知类型仍降级为仅标记已读 |
-| 后端姓名字段 | `ExpenseResponse` 补 `applicant: UserBrief`、`approver: UserBrief | None`(对齐 `LeaveResponse`),否则表格「申请人」列与「当前审批·主管姓名」无数据源;纯新增字段,不破坏既有调用方 |
+| 后端姓名字段 | `ExpenseResponse` 的 `applicant_id`/`approver_id` 键替换为 `applicant: UserBrief`、`approver: UserBrief | None`(对齐 `LeaveResponse`),否则表格「申请人」列与「当前审批·主管姓名」无数据源;为键替换而非纯新增,全仓无其他消费旧键的调用方 |
 | 状态管理 | 无新 store;列表/筛选/分页全部页面本地态(镜像 leaves/notifications 模式) |
 | 权限门控 | 菜单 `expense:list`;页面无 `expense:list` → `<Navigate to="/" />`;Tab 按权限过滤;操作按钮按权限与状态渲染 |
 
@@ -92,13 +92,13 @@ ExpenseDetailResponse = ExpenseResponse + {
 | 驳回弹窗 | `frontend/src/pages/expenses/RejectModal.tsx` | 与请假版同构克隆,改调 `rejectExpense` |
 | 通知联动 | 改 `frontend/src/pages/notifications/NotificationsPage.tsx` | 点击条目处 `ref_type` 分发:`"leave"` → `/leaves`(既有)、`"expense"` → `/expenses` 带 `{ openExpenseId: ref_id }`、未知 → 仅标记已读 |
 
-**常量**:类型/状态中文映射与颜色放 `frontend/src/pages/expenses/labels.ts`(EXPENSE_TYPE_LABELS:差旅/办公/招待/交通/其他;EXPENSE_STATUS_LABELS:待主管审批/待二级审批/已通过/已驳回/已撤回)。
+**常量**:类型/状态中文映射与颜色放 `frontend/src/utils/expense.tsx`(EXPENSE_TYPE_MAP:差旅/办公/招待/交通/其他;EXPENSE_STATUS_MAP:待主管审批/待二级审批/已通过/已驳回/已撤回;另导出 `expenseTypeTag` / `expenseStatusTag` 渲染函数)。
 
 ## 5. 数据流
 
 - 各 Panel 本地态管理 `items/total/page/filters/loading/error`;筛选或分页变化触发重拉(镜像 AllLeavesPanel 模式)
 - 操作闭环:新建/撤回/通过/驳回成功 → message.success + 重拉当前列表;409(并发被抢审)→ message.error(后端 message)+ 同样重拉,让用户看到最新状态
-- 详情弹窗:`expenseId: string | null` 受控,非 null 时挂载并按 id 拉详情;审批/驳回操作也可在详情弹窗内触发(按钮权限同 Todo 面板),成功后重拉详情并通知父级重拉列表
+- 详情弹窗:`expenseId: string | null` 受控,非 null 时挂载并按 id 拉详情;弹窗为纯展示(信息 + 附件 + Timeline),审批/驳回操作在「待我审批」面板行内触发,成功后重拉列表
 - 附件下载:`downloadAttachment` 返回 Blob → `URL.createObjectURL` → 临时 `<a download={filename}>` 点击 → `revokeObjectURL`;鉴权由 axios 拦截器自带 Authorization,无需新机制
 - 金额:展示 `¥{amount}`(字符串原样);表单 InputNumber 值 `toFixed(2)` 后转字符串塞 FormData
 
