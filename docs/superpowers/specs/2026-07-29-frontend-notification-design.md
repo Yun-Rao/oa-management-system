@@ -70,7 +70,7 @@
 
 ## 6. 扩展预留(不实现)
 
-- 未来报销通知(`ref_type="expense"`):点击跳转处按 `ref_type` 分发——本期仅 `"leave"` 一个分支,未知 `ref_type` 降级为"仅标记已读不跳转",不报错。
+- 报销通知(`ref_type="expense"`)跳转分支已实现(2026-07-29 报销前端):点击 → `navigate("/expenses", { state: { openExpenseId } })`;未知 `ref_type` 仍降级为"仅标记已读不跳转",不报错。
 - 角标轮询间隔 30s 为常量,后续如需可调。
 
 ## 7. 错误处理
