@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,8 +10,6 @@ class Settings(BaseSettings):
     JWT_EXPIRE_MINUTES: int = 1440
     SEED_ADMIN_EMAIL: str = "admin@company.com"
     SEED_ADMIN_PASSWORD: str = "Admin123!"
-    EXPENSE_L2_THRESHOLD: Decimal = 2000
-    UPLOAD_DIR: str = "uploads"
 
 
 settings = Settings()
