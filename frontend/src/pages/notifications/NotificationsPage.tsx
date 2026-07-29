@@ -62,6 +62,8 @@ export default function NotificationsPage() {
     }
     if (n.ref_type === "leave") {
       navigate("/leaves", { state: { openLeaveId: n.ref_id } });
+    } else if (n.ref_type === "expense") {
+      navigate("/expenses", { state: { openExpenseId: n.ref_id } });
     }
   }
 

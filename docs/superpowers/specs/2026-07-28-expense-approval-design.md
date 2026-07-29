@@ -139,7 +139,7 @@ pending_l1 / pending_l2 ── cancel(申请人) ──► cancelled
 ### 设计细则
 
 - 分页约定沿用:items / total / page / page_size,page ≥ 1,page_size ≤ 100
-- `ExpenseResponse{id, type, amount, reason, status, applicant_id, approver_id, created_at, updated_at}`;`ExpenseDetailResponse` 加 `history[]`(含 actor 姓名)与 `attachments[]`(id/filename/content_type/size_bytes,不含 stored_path)
+- `ExpenseResponse{id, type, amount, reason, status, applicant: UserBrief, approver: UserBrief | null, created_at, updated_at}`(applicant/approver 为 `{id, name}` 姓名对象,对齐 LeaveResponse;pending_l2 权限池时 approver 为 null);`ExpenseDetailResponse` 加 `history[]`(含 actor 姓名)与 `attachments[]`(id/filename/content_type/size_bytes,不含 stored_path)
 - 新权限点 5 个:`expense:create` / `expense:list` / `expense:approve` / `expense:approve_l2` / `expense:list_all`;seed 追加:Admin 全量、部门主管 approve、员工 create+list(对齐请假 seed 惯例);`expense:approve_l2` 仅 Admin/HR 角色
 - 附件限制在 schema/路由层校验:数量 1~5、单文件 ≤ 5MB、扩展名 + 魔数(jpeg FFD8、png 89504E47、pdf %PDF)
 - 附件落盘:`{UPLOAD_DIR}/expenses/{expense_id}/{uuid4}.{ext}`;流程:校验 → 读文件落盘 → DB 事务(失败则删已写文件)→ commit;下载 404/403 语义同详情

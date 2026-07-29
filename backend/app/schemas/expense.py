@@ -39,8 +39,8 @@ class ExpenseResponse(BaseModel):
     amount: Decimal
     reason: str
     status: str
-    applicant_id: uuid.UUID
-    approver_id: uuid.UUID | None
+    applicant: UserBrief
+    approver: UserBrief | None
     created_at: datetime
     updated_at: datetime
 

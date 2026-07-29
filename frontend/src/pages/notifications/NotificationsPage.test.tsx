@@ -38,6 +38,11 @@ function LeavesProbe() {
   return <div data-testid="leaves-state">{JSON.stringify(loc.state)}</div>;
 }
 
+function ExpensesProbe() {
+  const loc = useLocation();
+  return <div data-testid="expenses-state">{JSON.stringify(loc.state)}</div>;
+}
+
 function renderPage() {
   return render(
     <App>
@@ -45,6 +50,7 @@ function renderPage() {
         <Routes>
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/leaves" element={<LeavesProbe />} />
+          <Route path="/expenses" element={<ExpensesProbe />} />
         </Routes>
       </MemoryRouter>
     </App>
@@ -128,5 +134,38 @@ describe("NotificationsPage", () => {
     await waitFor(() =>
       expect(mockedList).toHaveBeenLastCalledWith({ page: 2, page_size: 20 })
     );
+  });
+
+  it("点击报销通知:标记已读 + 跳转 /expenses 带 openExpenseId", async () => {
+    mockedList.mockResolvedValue({
+      items: [item({ id: "n9", type: "expense_submitted", ref_type: "expense", ref_id: "E9" })],
+      total: 1,
+      page: 1,
+      page_size: 20,
+    });
+    mockedMarkRead.mockResolvedValue(item({ id: "n9", read_at: "2026-07-29T10:00:00" }));
+    renderPage();
+    const user = userEvent.setup();
+    await user.click(await screen.findByText("新的待审批任务"));
+    await waitFor(() => expect(mockedMarkRead).toHaveBeenCalledWith("n9"));
+    await waitFor(() =>
+      expect(screen.getByTestId("expenses-state")).toHaveTextContent('{"openExpenseId":"E9"}')
+    );
+  });
+
+  it("未知 ref_type:仅标记已读,不跳转", async () => {
+    mockedList.mockResolvedValue({
+      items: [item({ id: "n8", ref_type: "system", ref_id: "S1" })],
+      total: 1,
+      page: 1,
+      page_size: 20,
+    });
+    mockedMarkRead.mockResolvedValue(item({ id: "n8", read_at: "2026-07-29T10:00:00" }));
+    renderPage();
+    const user = userEvent.setup();
+    await user.click(await screen.findByText("新的待审批任务"));
+    await waitFor(() => expect(mockedMarkRead).toHaveBeenCalledWith("n8"));
+    expect(screen.queryByTestId("expenses-state")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("leaves-state")).not.toBeInTheDocument();
   });
 });

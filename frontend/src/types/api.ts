@@ -136,3 +136,46 @@ export interface NotificationListResponse {
   page: number;
   page_size: number;
 }
+
+export type ExpenseType = "travel" | "office" | "entertainment" | "transport" | "other";
+export type ExpenseStatus = "pending_l1" | "pending_l2" | "approved" | "rejected" | "cancelled";
+
+export interface ExpenseItem {
+  id: string;
+  type: string;
+  amount: string;
+  reason: string;
+  status: string;
+  applicant: UserBrief;
+  approver: UserBrief | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExpenseHistoryItem {
+  from_status: string | null;
+  to_status: string;
+  actor: UserBrief;
+  comment: string | null;
+  created_at: string;
+}
+
+export interface ExpenseAttachment {
+  id: string;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
+}
+
+export interface ExpenseDetail extends ExpenseItem {
+  history: ExpenseHistoryItem[];
+  attachments: ExpenseAttachment[];
+}
+
+export interface ExpenseListResponse {
+  items: ExpenseItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
