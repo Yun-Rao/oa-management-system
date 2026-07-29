@@ -179,3 +179,30 @@ export interface ExpenseListResponse {
   page: number;
   page_size: number;
 }
+
+export interface LeaveStatItem {
+  department_id: string;
+  department_name: string;
+  request_count: number;
+  total_days: number;
+}
+
+export interface ExpenseStatItem {
+  department_id: string;
+  department_name: string;
+  request_count: number;
+  total_amount: string;
+}
+
+export interface ApprovalDurationItem {
+  category: string;
+  completed_count: number;
+  avg_hours: number | null;
+}
+
+export interface DashboardSummary {
+  month: string;
+  leave_stats: LeaveStatItem[];
+  expense_stats: ExpenseStatItem[];
+  approval_durations: ApprovalDurationItem[];
+}
