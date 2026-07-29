@@ -1,6 +1,6 @@
 from fastapi import APIRouter, FastAPI
 
-from app.api.v1 import auth, dashboard, departments, expenses, leaves, notifications, roles, users
+from app.api.v1 import auth, departments, leaves, roles, users
 from app.core.handlers import register_exception_handlers
 
 app = FastAPI(title="OA Management System")
@@ -12,9 +12,6 @@ api_v1.include_router(users.router)
 api_v1.include_router(roles.router)
 api_v1.include_router(departments.router)
 api_v1.include_router(leaves.router)
-api_v1.include_router(expenses.router)
-api_v1.include_router(notifications.router)
-api_v1.include_router(dashboard.router)
 app.include_router(api_v1)
 
 
