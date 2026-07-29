@@ -137,7 +137,7 @@ async def test_large_amount_two_level_chain(db, client, upload_dir):
     resp = await client.post(f"/api/v1/expenses/{eid}/approve", headers=mgr_h)
     assert resp.status_code == 200
     assert resp.json()["status"] == "pending_l2"
-    assert resp.json()["approver_id"] is None
+    assert resp.json()["approver"] is None
 
     # 二级扇出:admin 收到待审批通知;申请人此时无"已通过"通知
     n = await latest_notification(client, admin_h)
