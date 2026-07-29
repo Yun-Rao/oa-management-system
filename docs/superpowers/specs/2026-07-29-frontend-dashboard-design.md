@@ -111,9 +111,9 @@ vitest + Testing Library + axios-mock-adapter / vi.mock,镜像既有模块风格
 
 ## 10. 验收标准
 
-- [ ] `/dashboard` 页面按 §3 契约渲染三段统计,MonthPicker 切月重拉
-- [ ] Admin 见全部门多行;Manager 仅本部门;employee 无菜单项且直接访问重定向首页
-- [ ] 明细行 `total_amount` 字符串直拼 `¥` 展示;仅汇总卡片合计允许 `Number` 求和 + `toFixed(2)`(§3 唯一例外);`avg_hours=null` 显示 `—`
-- [ ] 空数据月份各 Section 正确空态;拉取失败 Alert 且保留旧数据
-- [ ] 前端全量测试 + typecheck 绿,后端无回归
-- [ ] 浏览器实测四视角(admin/manager/切月/employee)截图存 `.superpowers/sdd/acceptance/`(`dash-` 前缀)
+- [x] `/dashboard` 页面按 §3 契约渲染三段统计,MonthPicker 切月重拉
+- [x] Admin 见全部门多行;Manager 仅本部门;employee 无菜单项且直接访问重定向首页
+- [x] 明细行 `total_amount` 字符串直拼 `¥` 展示;仅汇总卡片合计允许 `Number` 求和 + `toFixed(2)`(§3 唯一例外);`avg_hours=null` 显示 `—`
+- [x] 空数据月份各 Section 正确空态;拉取失败 Alert 且保留旧数据
+- [x] 前端全量测试 + typecheck 绿,后端无回归
+- [x] 浏览器实测四视角(admin/manager/切月/employee)截图存 `.superpowers/sdd/acceptance/`(`dash-` 前缀)
