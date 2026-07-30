@@ -100,13 +100,14 @@ async def submit(client, headers, **over):
 
 async def test_create_201_and_file_on_disk(db, client, upload_dir):
     mgr, _ = await make_manager_client(db, client)
-    _, emp_h = await make_employee_client(db, client, mgr)
+    emp, emp_h = await make_employee_client(db, client, mgr)
 
     resp = await submit(client, emp_h)
     assert resp.status_code == 201, resp.text
     body = resp.json()
     assert body["status"] == "pending_l1"
-    assert body["approver_id"] == str(mgr.id)
+    assert body["applicant"] == {"id": str(emp.id), "name": emp.name}
+    assert body["approver"] == {"id": str(mgr.id), "name": mgr.name}
     assert float(body["amount"]) == 1999.5
 
     detail = await client.get(f"/api/v1/expenses/{body['id']}", headers=emp_h)

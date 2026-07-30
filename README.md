@@ -6,17 +6,18 @@
 ## 技术架构
 - 后端：FastAPI + SQLAlchemy Async + PostgreSQL
 - 权限模型：RBAC (Role-Based Access Control)
-- 前端：React + Zustand
+- 前端：React + antd + Zustand(vitest 测试)
 - 异步任务：Celery + Redis
 - 数据库迁移：Alembic
 - 部署：Docker + Docker Compose
 
 ## 功能模块
-- [x] 用户认证（登录/JWT鉴权）
-- [x] 角色权限管理（RBAC）
-- [x] 组织架构管理（部门/职位）
-- [ ] 审批流程（请假/报销）
-- [ ] 消息通知
+- [x] 用户认证(登录/JWT鉴权)
+- [x] 角色权限管理(RBAC)
+- [x] 组织架构管理(部门/职位)
+- [x] 审批流程(请假/报销,二级审批)
+- [x] 消息通知(审批结果站内通知,跳转联动)
+- [x] 数据看板(按月部门请假/报销统计、审批时效)
 
 ## 分支规范
 - main：生产分支，仅接受来自develop的合并

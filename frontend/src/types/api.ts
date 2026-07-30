@@ -136,3 +136,73 @@ export interface NotificationListResponse {
   page: number;
   page_size: number;
 }
+
+export type ExpenseType = "travel" | "office" | "entertainment" | "transport" | "other";
+export type ExpenseStatus = "pending_l1" | "pending_l2" | "approved" | "rejected" | "cancelled";
+
+export interface ExpenseItem {
+  id: string;
+  type: string;
+  amount: string;
+  reason: string;
+  status: string;
+  applicant: UserBrief;
+  approver: UserBrief | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExpenseHistoryItem {
+  from_status: string | null;
+  to_status: string;
+  actor: UserBrief;
+  comment: string | null;
+  created_at: string;
+}
+
+export interface ExpenseAttachment {
+  id: string;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
+}
+
+export interface ExpenseDetail extends ExpenseItem {
+  history: ExpenseHistoryItem[];
+  attachments: ExpenseAttachment[];
+}
+
+export interface ExpenseListResponse {
+  items: ExpenseItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface LeaveStatItem {
+  department_id: string;
+  department_name: string;
+  request_count: number;
+  total_days: number;
+}
+
+export interface ExpenseStatItem {
+  department_id: string;
+  department_name: string;
+  request_count: number;
+  total_amount: string;
+}
+
+export interface ApprovalDurationItem {
+  category: string;
+  completed_count: number;
+  avg_hours: number | null;
+}
+
+export interface DashboardSummary {
+  month: string;
+  leave_stats: LeaveStatItem[];
+  expense_stats: ExpenseStatItem[];
+  approval_durations: ApprovalDurationItem[];
+}

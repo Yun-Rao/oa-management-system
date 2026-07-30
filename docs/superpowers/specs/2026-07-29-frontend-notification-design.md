@@ -26,7 +26,7 @@
 | 入口形态 | Header 铃铛 `Badge`(未读数)+ 独立路由 `/notifications` 消息中心页;菜单不加新项 |
 | 未读数同步 | 新建 `useNotificationStore`(zustand):角标轮询写入,消息中心页标记已读后同步更新,角标即时刷新 |
 | 轮询策略 | MainLayout 挂载即拉一次,之后 30s `setInterval`;卸载清理;失败静默下轮重试 |
-| 点击通知 | 未读 → `markRead` + store 同步 + 列表本地更新读态;然后 `navigate("/leaves", { state: { openLeaveId } })`,LeavesPage 检测 state 自动打开 `LeaveDetailModal` |
+| 点击通知 | 未读 → `markRead` + store 同步 + 列表本地更新读态;然后按 `ref_type` 分发:`"leave"` → `navigate("/leaves", { state: { openLeaveId } })`(LeavesPage 检测 state 自动打开 `LeaveDetailModal`),`"expense"` → `navigate("/expenses", { state: { openExpenseId } })`,未知 `ref_type` → 仅标记已读不跳转、不报错 |
 | 权限 | 无权限点:登录即可(后端 `get_current_user`);路由只需 `RequireAuth` |
 | 列表数据流 | 页面本地态管理列表/分页;store 只管 `unreadCount` 一个数,职责单一 |
 
@@ -63,14 +63,14 @@
 ## 5. 数据流
 
 - **轮询**:MainLayout 挂载 → `refresh()`;之后每 30s 一次;失败静默(下轮重试,不弹错)。
-- **点击通知条目**:未读 → `markRead(id)` → `decrement(1)` + 列表本地置读态;随后 `navigate("/leaves", { state: { openLeaveId: ref_id } })`;已读条目直接跳转。标记失败:message 提示,仍允许跳转(详情可读)。
+- **点击通知条目**:未读 → `markRead(id)` → `decrement(1)` + 列表本地置读态;随后按 `ref_type` 分发跳转:`"leave"` → `navigate("/leaves", { state: { openLeaveId: ref_id } })`,`"expense"` → `navigate("/expenses", { state: { openExpenseId: ref_id } })`,未知 `ref_type` → 仅标记已读不跳转、不报错;已读条目直接按同样规则分发。标记失败:message 提示,仍允许跳转(详情可读)。
 - **全部已读**:`markAllRead()` → `clear()` + 重拉当前页列表。
 - **Tab 切换**(全部/未读):重置到第 1 页重拉;"未读"Tab 传 `is_read=false`,"全部"Tab 不传该参数。
 - **登出/401**:MainLayout 卸载即停轮询;store 残留 `unreadCount` 在下次登录首次 `refresh()` 时被覆盖,无需显式重置。
 
 ## 6. 扩展预留(不实现)
 
-- 未来报销通知(`ref_type="expense"`):点击跳转处按 `ref_type` 分发——本期仅 `"leave"` 一个分支,未知 `ref_type` 降级为"仅标记已读不跳转",不报错。
+- 报销通知(`ref_type="expense"`)跳转分支已实现(2026-07-29 报销前端):点击 → `navigate("/expenses", { state: { openExpenseId } })`;未知 `ref_type` 仍降级为"仅标记已读不跳转",不报错。
 - 角标轮询间隔 30s 为常量,后续如需可调。
 
 ## 7. 错误处理
