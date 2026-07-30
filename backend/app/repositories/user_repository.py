@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import uuid
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.permission import Permission
+from app.models.role import Role
 from app.models.user import User
 
 
@@ -61,6 +65,16 @@ class UserRepository:
             query.order_by(User.created_at).offset(offset).limit(limit)
         )
         return list(result.scalars().all()), total
+
+    async def list_by_permission(self, code: str) -> list[User]:
+        result = await self.db.execute(
+            select(User)
+            .join(User.roles)
+            .join(Role.permissions)
+            .where(Permission.code == code, User.is_active.is_(True))
+            .distinct()
+        )
+        return list(result.scalars().all())
 
     async def create(self, user: User) -> User:
         self.db.add(user)
