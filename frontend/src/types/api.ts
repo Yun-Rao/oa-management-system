@@ -118,3 +118,21 @@ export interface LeaveListResponse {
   page: number;
   page_size: number;
 }
+
+export interface NotificationItem {
+  id: string;
+  type: string;
+  title: string;
+  content: string;
+  ref_type: string;
+  ref_id: string;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface NotificationListResponse {
+  items: NotificationItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
